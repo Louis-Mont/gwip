@@ -1,5 +1,4 @@
 import pymysql
-import pyodbc
 import pypyodbc
 from tkinter import END, Tk, Entry, StringVar, Label, RAISED, Button, OptionMenu, Text, Scrollbar
 from datetime import datetime
@@ -23,7 +22,7 @@ def log_add(lg):
     log.configure(state="disabled")
 
 
-def del_cat(ps_db: pyodbc.Connection):
+def del_cat(ps_db: pypyodbc.Connection):
     cur_ps_db = ps_db.cursor()
     log_add("Suppression des catégories de prestashop")
     cur_ps_db.execute("DELETE FROM ps_category WHERE id_category NOT IN (1,2)")
@@ -38,7 +37,7 @@ def del_cat(ps_db: pyodbc.Connection):
     log_add("Catégories supprimées")
 
 
-def del_prod(ps_db: pyodbc.Connection):
+def del_prod(ps_db: pypyodbc.Connection):
     cur_ps_db = ps_db.cursor()
     log_add("Suppression des produits de prestashop")
     cur_ps_db.execute("DELETE FROM ps_product")
@@ -52,7 +51,7 @@ def del_prod(ps_db: pyodbc.Connection):
     log_add("Produits supprimés")
 
 
-def del_img(ps_db: pyodbc.Connection):
+def del_img(ps_db: pypyodbc.Connection):
     cur_ps_db = ps_db.cursor()
     log_add("Suppression des images de prestashop")
     cur_ps_db.execute("DELETE FROM ps_image")
@@ -70,7 +69,7 @@ def reset_db():
     del_img(ps_db)
 
 
-def add_cat(cat: str, db_ps: pyodbc.Connection):
+def add_cat(cat: str, db_ps: pypyodbc.Connection):
     """
     Add category cat into prestashop's db_ps
     :param cat: The name of the category added
@@ -110,7 +109,7 @@ def add_cat(cat: str, db_ps: pyodbc.Connection):
     return cat_id
 
 
-def ii(table: str, vals: dict[str, str], cur: pyodbc.Cursor, conditions: dict[str, str] = None):
+def ii(table: str, vals: dict[str, str], cur: pypyodbc.Cursor, conditions: dict[str, str] = None):
     """
     Inserts into the table vals using cur
     :param table: The table you're inserting into
@@ -135,7 +134,7 @@ def ii(table: str, vals: dict[str, str], cur: pyodbc.Cursor, conditions: dict[st
             f"UPDATE {table} SET {kcv(u_vals, '=')} WHERE {kcv(conditions, '=', ' AND ')}")
 
 
-def set_lang(table: str, vals: dict[str, str], cur: pyodbc.Cursor, conditions: dict[str, str] = None, lang: int = 2):
+def set_lang(table: str, vals: dict[str, str], cur: pypyodbc.Cursor, conditions: dict[str, str] = None, lang: int = 2):
     """
     Sets the different name the item can have following the different languages you can have
     :param table: table where the different languages are stocked
@@ -358,7 +357,7 @@ def main():
     return db_ps, db_gdr
 
 
-def on_closing(dbs: list[pyodbc.Connection], names: list[str]):
+def on_closing(dbs: list[pypyodbc.Connection], names: list[str]):
     """
     When the main frame closes
     :param dbs: databases to be closed
