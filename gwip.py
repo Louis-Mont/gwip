@@ -370,7 +370,6 @@ def on_closing(dbs: list[pyodbc.Connection], names: list[str]):
         print(f"{names[i]} database connection correctly closed")
 
     frame.destroy()
-    quit(0)
 
 
 if __name__ == "__main__":
