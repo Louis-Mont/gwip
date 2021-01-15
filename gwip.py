@@ -1,6 +1,6 @@
 import pymysql
-import pypyodbc
 import pyodbc
+import pypyodbc
 from tkinter import END, Tk, Entry, StringVar, Label, RAISED, Button, OptionMenu, Text, Scrollbar
 from datetime import datetime
 from utils import dict_to_str, col_to_str, kcv, rev_col
@@ -344,14 +344,15 @@ def main():
     db_ps = None
     log_add("Connexion à la base de données prestashop")
     try:
-        db_ps = pymysql.connect(prestashop_ip, prestashop_login,
-                                prestashop_pwd, prestashop_db_name)
+        db_ps = pymysql.connect(host=prestashop_ip, user=prestashop_login,
+                                password=prestashop_pwd, database=prestashop_db_name)
         log_add("Connexion réussie")
     except pymysql.err.OperationalError as OEr:
         log_add(f"{OEr.args[1]}")
 
     log_add("Connexion à la BDD de gdr ")
-    db_gdr = pypyodbc.connect(f"DSN={gdr_dsn.get()};")
+    debug = f"DSN={gdr_dsn.get()}"
+    db_gdr = pypyodbc.connect(f"DSN={gdr_dsn.get()}")
     log_add("Connexion réussie")
 
     return db_ps, db_gdr
