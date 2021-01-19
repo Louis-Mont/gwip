@@ -1,4 +1,4 @@
-from utils import dict_to_str, kcv
+from utils import dict_to_str, kcv, l_to_str
 from abc import ABC, abstractmethod
 
 
@@ -13,6 +13,25 @@ class Database(ABC):
     def __del__(self):
         if self.DB is not None:
             self.DB.close()
+
+    def df(self, table: str, n_conditions: tuple = None):
+        """
+        Delete all content from the table not in conditions
+        :param table: The table you're deleting from
+        :param n_conditions: The no conditions
+        """
+        if self.DB is not None:
+            self._df(table, n_conditions)
+            return True
+        else:
+            return False
+
+    def _df(self, table: str, n_conditions: tuple = None):
+        cur_ps = self.DB.cursor()
+        if n_conditions is None:
+            cur_ps.execute(f"DELETE FROM {table}")
+        else:
+            cur_ps.execute(f"DELETE FROM {table} WHERE {n_conditions[0]} NOT IN ({l_to_str(n_conditions[1])})")
 
     def ii(self, table: str, values: dict, conditions: dict = None):
         """

@@ -2,7 +2,7 @@ import pymysql
 import pypyodbc
 from tkinter import END, Tk, Entry, StringVar, Label, RAISED, Button, OptionMenu, Text, Scrollbar
 from datetime import datetime
-from utils import dict_to_str, col_to_str, kcv, rev_col
+from utils import dict_to_str, l_to_str, kcv, rev_col
 from yesno import yesno
 
 VERSION = '1.2.0 EXPERIMENTAL'
@@ -61,12 +61,25 @@ def del_img(ps_db: pypyodbc.Connection):
     log_add("Images supprimées")
 
 
+def df(table: str, ps_db: pypyodbc.Connection, condition: tuple = None):
+    cur_ps = ps_db.cursor()
+    if condition is None:
+        cur_ps.execute(f"DELETE FROM {table}")
+    else:
+        cur_ps.execute(f"DELETE FROM {table} WHERE {condition[0]} NOT IN ({l_to_str(condition[1])})")
+
+
 def reset_db():
+    """
+    Only resets categories, products, images in the prestashop database
+    """
+    tables = ["ps_image", "ps_image_lang", "ps_image_type", "ps_image_shop", "ps_product", "ps_product_lang",
+              "ps_product_shop"]
     PS_DB, GDR_DB = main()
     ps_db = PS_DB
-    del_cat(ps_db)
-    del_prod(ps_db)
-    del_img(ps_db)
+    for t in tables:
+        df(t, ps_db)
+    del_cat()
 
 
 def add_cat(cat: str, db_ps: pypyodbc.Connection) -> int:
@@ -190,7 +203,7 @@ def db_ii_id(db_ps: pymysql.Connection, ps_con: tuple, gdr_prod: dict, id: int, 
     ii('ps_product', ps_prod_dict, ps_cur, conditions)
 
     # The ps_product_shop db is almost similar the the ps_product one
-    ps_prod_shop_dict = ps_prod_dict
+    ps_prod_shop_dict = ps_prod_dict.copy()
     ps_prod_shop_dict['active'] = f"{1}"
     ps_prod_shop_dict['id_shop'] = f"{1}"
     ps_prod_shop_dict.pop('width')
@@ -211,6 +224,18 @@ def db_ii_id(db_ps: pymysql.Connection, ps_con: tuple, gdr_prod: dict, id: int, 
 
     if conditions is not None:
         conditions.pop('id_shop')
+
+    ps_cur.execute("SELECT id_stock_available FROM ps_stock_available")
+    ps_stock_id = len(ps_cur.fetchall()) + 1
+    ps_stock_a_dict = {
+        'id_stock_available': f"{ps_stock_id}",
+        'id_product': f"{id}",
+        'id_product_attribute': f"{0}",
+        'id_shop': f"{1}",
+        'id_shop_group': f"{0}",
+        'quantity': f"{gdr_prod['Nombre']}"
+    }
+    ii('ps_stock_available', ps_stock_a_dict, ps_cur, conditions)
 
     # 1 pour Root, 2 pour Home
     for id_cat in [1, 2, ps_con]:
@@ -253,7 +278,7 @@ def add_id(id: int):
     # Photos not included atm
     log_add(f"Ajout du produit {id}")
     gdr_cur.execute(
-        f"SELECT {col_to_str(product_cols)} FROM Produit WHERE IDProduit={id}")
+        f"SELECT {l_to_str(product_cols)} FROM Produit WHERE IDProduit={id}")
     gdr_con = gdr_cur.fetchone()
     # print(gdr_con)
     if gdr_con is not None:
@@ -303,7 +328,7 @@ def syncventes():
     for id_prod in ps_cur.fetchall():
         # print(id_prod)
         gdr_cur.execute(
-            f"SELECT {col_to_str(ventes_cols)} FROM Lignes_Vente WHERE IDProduit={id_prod[0]}")
+            f"SELECT {l_to_str(ventes_cols)} FROM Lignes_Vente WHERE IDProduit={id_prod[0]}")
         sells = gdr_cur.fetchall()
         # print(sells)
         for s1 in sells:
@@ -356,6 +381,27 @@ def main():
     # debug = f"DSN={gdr_dsn.get()}"
     db_gdr = pypyodbc.connect(f"DSN={gdr_dsn.get()}")
     log_add("Connexion réussie")
+
+    """cur_ps = db_ps.cursor()
+    cur_db = db_gdr.cursor()
+
+    cur_ps.execute("SHOW TABLES")
+    tables = cur_ps.fetchall()
+    print(tables)
+    i = 0
+    for table in tables:
+        # tables[0]
+        cur_ps.execute(f"SELECT * FROM {table[0]}")
+        for results in cur_ps.fetchall():
+            for fields in results:
+                try:
+                    if int(fields) == 300:
+                        print(f"{tables[i][0]}\t{fields}")
+                except ValueError:
+                    pass
+                except TypeError:
+                    pass
+        i += 1"""
 
     return db_ps, db_gdr
 

@@ -1,10 +1,10 @@
-def col_to_str(col):
+def l_to_str(l:list):
     """
     :return: all elements separated by a `,`
     :rtype: str
     """
     rtn = ""
-    for m in col:
+    for m in l:
         rtn += f"{m},"
     return rtn[:-1]
 
@@ -21,7 +21,7 @@ def dict_to_str(d: dict):
     :return: k,v each element of keys and values separated by a `,`
     :rtype: str,str
     """
-    return col_to_str(d.keys()), col_to_str(d.values())
+    return l_to_str(d.keys()), l_to_str(d.values())
 
 
 def kcv(d: dict, c: str, sep: str = ','):
