@@ -5,7 +5,7 @@ from datetime import datetime
 from utils import dict_to_str, l_to_str, kcv, rev_col
 from yesno import yesno
 
-VERSION = '1.2.0 EXPERIMENTAL'
+VERSION = '1.3.0 EXPERIMENTAL'
 
 cats = ['Meubles', 'Electroménagers', 'Multimédias', 'Textile', 'Culture', 'Loisirs', 'Vaisselle',
         'Bricolage-Jardinage',
