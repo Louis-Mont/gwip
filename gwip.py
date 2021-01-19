@@ -69,7 +69,7 @@ def reset_db():
     del_img(ps_db)
 
 
-def add_cat(cat: str, db_ps: pypyodbc.Connection):
+def add_cat(cat: str, db_ps: pypyodbc.Connection) -> int:
     """
     Add category cat into prestashop's db_ps
     :param cat: The name of the category added
@@ -162,6 +162,7 @@ def db_add_id(db_ps: pymysql.Connection, ps_con: tuple, gdr_prod: dict):
     db_ii_id(db_ps, ps_con, gdr_prod, prod_id)
 
 
+# WARNING ps_con is a tuple and work directly in strings?
 def db_ii_id(db_ps: pymysql.Connection, ps_con: tuple, gdr_prod: dict, id: int, update: bool = False):
     ps_cur = db_ps.cursor()
     if update:
