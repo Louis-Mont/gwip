@@ -109,7 +109,7 @@ def add_cat(cat: str, db_ps: pypyodbc.Connection):
     return cat_id
 
 
-def ii(table: str, vals: dict[str, str], cur: pypyodbc.Cursor, conditions: dict[str, str] = None):
+def ii(table: str, vals: dict, cur: pypyodbc.Cursor, conditions: dict = None):
     """
     Inserts into the table vals using cur
     :param table: The table you're inserting into
@@ -134,7 +134,7 @@ def ii(table: str, vals: dict[str, str], cur: pypyodbc.Cursor, conditions: dict[
             f"UPDATE {table} SET {kcv(u_vals, '=')} WHERE {kcv(conditions, '=', ' AND ')}")
 
 
-def set_lang(table: str, vals: dict[str, str], cur: pypyodbc.Cursor, conditions: dict[str, str] = None, lang: int = 2):
+def set_lang(table: str, vals: dict, cur: pypyodbc.Cursor, conditions: dict = None, lang: int = 2):
     """
     Sets the different name the item can have following the different languages you can have
     :param table: table where the different languages are stocked
@@ -155,14 +155,14 @@ def set_lang(table: str, vals: dict[str, str], cur: pypyodbc.Cursor, conditions:
         ii(f'{table}', vals, cur, u_cond)
 
 
-def db_add_id(db_ps: pymysql.Connection, ps_con: tuple, gdr_prod: dict[str, str]):
+def db_add_id(db_ps: pymysql.Connection, ps_con: tuple, gdr_prod: dict):
     ps_cur = db_ps.cursor()
     ps_cur.execute(f"SELECT id_product FROM ps_product")
     prod_id = len(ps_cur.fetchall()) + 1
     db_ii_id(db_ps, ps_con, gdr_prod, prod_id)
 
 
-def db_ii_id(db_ps: pymysql.Connection, ps_con: tuple, gdr_prod: dict[str, str], id: int, update: bool = False):
+def db_ii_id(db_ps: pymysql.Connection, ps_con: tuple, gdr_prod: dict, id: int, update: bool = False):
     ps_cur = db_ps.cursor()
     if update:
         conditions = {'id_product': id}
@@ -357,7 +357,7 @@ def main():
     return db_ps, db_gdr
 
 
-def on_closing(dbs: list[pypyodbc.Connection], names: list[str]):
+def on_closing(dbs: list, names: list):
     """
     When the main frame closes
     :param dbs: databases to be closed
