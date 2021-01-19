@@ -15,7 +15,7 @@ PS_DB = None
 GDR_DB = None
 
 
-def log_add(lg):
+def log_add(lg: str):
     # print(lg)
     log.configure(state="normal")
     log.insert(END, f"\n{lg}")
@@ -182,6 +182,7 @@ def db_ii_id(db_ps: pymysql.Connection, ps_con: tuple, gdr_prod: dict, id: int, 
         'width': f"{gdr_prod['Largeur']}",
         'height': f"{gdr_prod['Hauteur']}",
         'depth': f"{gdr_prod['Profondeur']}",
+        'weight': f"{gdr_prod['Poids']}",
         'redirect_type': f"'301-product'",
         'date_add': f"'{date}'",
         'date_upd': f"'{date}'"
@@ -197,6 +198,7 @@ def db_ii_id(db_ps: pymysql.Connection, ps_con: tuple, gdr_prod: dict, id: int, 
     ps_prod_shop_dict.pop('depth')
     ps_prod_shop_dict.pop('quantity')
     ps_prod_shop_dict.pop('reference')
+    ps_prod_shop_dict.pop('weight')
     ii('ps_product_shop', ps_prod_shop_dict, ps_cur, conditions)
 
     ps_prod_lang_dict = {
