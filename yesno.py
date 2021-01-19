@@ -34,5 +34,5 @@ def yesno(frame: Tk, title: str, text: str, yes_action=None, no_action=None):
     btn_no.pack()
 
     # frame.state = DISABLED
-    popup.protocol("WM_DELETE_WINDOW", lambda: _yesno_close(popup))
+    popup.protocol("WM_DELETE_WINDOW", lambda: _yesno_close(frame, popup))
     popup.mainloop()
