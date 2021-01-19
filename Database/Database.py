@@ -22,6 +22,7 @@ class Database(ABC):
         """
         if self.DB is not None:
             self._df(table, n_conditions)
+            self.DB.commit()
             return True
         else:
             return False
@@ -43,6 +44,7 @@ class Database(ABC):
         """
         if self.DB is not None:
             self._ii(table, values, conditions)
+            self.DB.commit()
             return True
         else:
             return False

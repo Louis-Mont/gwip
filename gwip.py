@@ -47,6 +47,7 @@ def del_prod(ps_db: pypyodbc.Connection):
     cur_ps_db.execute("DELETE FROM ps_product_attribute_shop")
     cur_ps_db.execute("DELETE FROM ps_product_lang")
     cur_ps_db.execute("DELETE FROM ps_product_shop")
+    cur_ps_db.execute("DELETE FROM ps_stock_available")
     ps_db.commit()
     log_add("Produits supprimés")
 
@@ -61,25 +62,40 @@ def del_img(ps_db: pypyodbc.Connection):
     log_add("Images supprimées")
 
 
-def df(table: str, ps_db: pypyodbc.Connection, condition: tuple = None):
-    cur_ps = ps_db.cursor()
-    if condition is None:
+def df(table: str, cur_ps: pypyodbc.Cursor, n_conditions: tuple = None):
+    """
+    Delete all content from the table not in conditions
+    :param table: The table you're deleting from
+    :param cur_ps: The cursor of the DB
+    :param n_conditions: The no conditions
+    """
+    if n_conditions is None:
         cur_ps.execute(f"DELETE FROM {table}")
     else:
-        cur_ps.execute(f"DELETE FROM {table} WHERE {condition[0]} NOT IN ({l_to_str(condition[1])})")
+        cur_ps.execute(f"DELETE FROM {table} WHERE {n_conditions[0]} NOT IN ({l_to_str(n_conditions[1])})")
 
 
 def reset_db():
     """
     Only resets categories, products, images in the prestashop database
     """
-    tables = ["ps_image", "ps_image_lang", "ps_image_type", "ps_image_shop", "ps_product", "ps_product_lang",
+    """tables = ["ps_image", "ps_image_lang", "ps_image_type", "ps_image_shop", "ps_product", "ps_product_lang",
               "ps_product_shop"]
+    tables_cat = ["ps_category", "ps_category_group", "ps_category_lang", "ps_category_shop"]
+    n_c = ('id_category', (1, 2))
     PS_DB, GDR_DB = main()
     ps_db = PS_DB
+    cur_ps = ps_db.cursor()
     for t in tables:
-        df(t, ps_db)
-    del_cat()
+        df(t, cur_ps)
+    for t in tables_cat:
+        df(t, cur_ps, n_c)
+    ps_db.commit()"""
+    PS_DB, GDR_DB = main()
+    ps_db = PS_DB
+    del_cat(ps_db)
+    del_img(ps_db)
+    del_prod(ps_db)
 
 
 def add_cat(cat: str, db_ps: pypyodbc.Connection) -> int:
@@ -153,7 +169,7 @@ def set_lang(table: str, vals: dict, cur: pypyodbc.Cursor, conditions: dict = No
     :param table: table where the different languages are stocked
     :param vals: all the fields to change without `lang` and `link_rewrite` columns
     :param cur: Cursor of the db you're executing on
-    :param conditions: if there is an update, the name of the column in 0 and the value of where this will be update in 1
+    :param conditions: if there is an update, the name of the column in 0 and the value in 1
     :param lang: By default 2, english(1) and french(2)
     """
     for lang in range(1, lang + 1):

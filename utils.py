@@ -1,10 +1,10 @@
-def l_to_str(l:list):
+def l_to_str(ll: list):
     """
     :return: all elements separated by a `,`
     :rtype: str
     """
     rtn = ""
-    for m in l:
+    for m in ll:
         rtn += f"{m},"
     return rtn[:-1]
 
