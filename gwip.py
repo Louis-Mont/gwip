@@ -11,8 +11,8 @@ cats = ['Meubles', 'Electroménagers', 'Multimédias', 'Textile', 'Culture', 'Lo
         'Bricolage-Jardinage',
         'Décoration-Bibelot', 'Puériculture']
 
-PS_DB = None
-GDR_DB = None
+PS_DB: pymysql.Connection = None
+GDR_DB: pypyodbc.Connection = None
 
 
 def log_add(lg: str):
@@ -353,7 +353,7 @@ def main():
         log_add(f"{OEr.args[1]}")
 
     log_add("Connexion à la BDD de gdr ")
-    debug = f"DSN={gdr_dsn.get()}"
+    # debug = f"DSN={gdr_dsn.get()}"
     db_gdr = pypyodbc.connect(f"DSN={gdr_dsn.get()}")
     log_add("Connexion réussie")
 
