@@ -171,7 +171,7 @@ def db_ii_id(db_ps: pymysql.Connection, ps_con: tuple, gdr_prod: dict[str, str],
     date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     ps_prod_dict = {
         'id_product': f"{id}",
-        'id_category_default': f"{2}",
+        'id_category_default': f"{ps_con}",
         'id_tax_rules_group': f"{0}",
         'on_sale': f"{1}",
         'quantity': f"{gdr_prod['Nombre']}",
