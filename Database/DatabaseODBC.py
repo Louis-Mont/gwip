@@ -3,10 +3,11 @@ import pypyodbc
 
 
 class DatabaseODBC(Database):
-    def connect(self, dsn: str):
+    def connect(self, dsn):
         """
         Connects to a DSN
         :param dsn: The DSN you're accessing to
+        :type dsn: str
         :return: True if the connection is successful, False if it isn't
         """
         try:

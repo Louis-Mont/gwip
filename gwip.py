@@ -11,8 +11,8 @@ cats = ['Meubles', 'Electroménagers', 'Multimédias', 'Textile', 'Culture', 'Lo
         'Bricolage-Jardinage',
         'Décoration-Bibelot', 'Puériculture']
 
-PS_DB: pymysql.Connection = None
-GDR_DB: pypyodbc.Connection = None
+PS_DB = None
+GDR_DB = None
 
 
 def log_add(lg):
@@ -98,7 +98,7 @@ def reset_db():
     del_prod(ps_db)
 
 
-def add_cat(cat, db_ps) -> int:
+def add_cat(cat, db_ps):
     """
     Add category cat into prestashop's db_ps
     :param cat: The name of the category added
@@ -192,15 +192,15 @@ def db_add_id(db_ps, ps_con, gdr_prod):
 
 
 # WARNING ps_con is a tuple and work directly in strings?
-def db_ii_id(db_ps, ps_con, gdr_prod, id, update=False):
+def db_ii_id(db_ps, ps_con, gdr_prod, id_product, update=False):
     ps_cur = db_ps.cursor()
     if update:
-        conditions = {'id_product': id}
+        conditions = {'id_product': id_product}
     else:
         conditions = None
     date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     ps_prod_dict = {
-        'id_product': f"{id}",
+        'id_product': f"{id_product}",
         'id_category_default': f"{ps_con}",
         'id_tax_rules_group': f"{0}",
         'on_sale': f"{1}",
@@ -231,7 +231,7 @@ def db_ii_id(db_ps, ps_con, gdr_prod, id, update=False):
     ii('ps_product_shop', ps_prod_shop_dict, ps_cur, conditions)
 
     ps_prod_lang_dict = {
-        'id_product': f"{id}",
+        'id_product': f"{id_product}",
         'name': f"'{ps_title.get()}'"
     }
     if conditions is not None:
@@ -245,7 +245,7 @@ def db_ii_id(db_ps, ps_con, gdr_prod, id, update=False):
     ps_stock_id = len(ps_cur.fetchall()) + 1
     ps_stock_a_dict = {
         'id_stock_available': f"{ps_stock_id}",
-        'id_product': f"{id}",
+        'id_product': f"{id_product}",
         'id_product_attribute': f"{0}",
         'id_shop': f"{1}",
         'id_shop_group': f"{0}",
@@ -257,7 +257,7 @@ def db_ii_id(db_ps, ps_con, gdr_prod, id, update=False):
     for id_cat in [1, 2, ps_con]:
         ps_cat_prod_dict = {
             'id_category': f"{id_cat}",
-            'id_product': f"{id}",
+            'id_product': f"{id_product}",
             'position': f"{1}"
         }
         if conditions is not None:
@@ -282,19 +282,19 @@ product_cols = ["IDProduit", "Commentaire", "Désignation", "Hauteur", "IDCatég
                 "PrixUnitCollecte", "Profondeur", "stocRestant", "Volume", "VolumeUnitaire"]
 
 
-def add_id(id):
+def add_id(id_product):
     """
     Add the corresponding id from the gdr db to the prestashop db
-    :param id: id added form the gdr db to the prestashop db
+    :param id_product: id added form the gdr db to the prestashop db
     """
     PS_DB, GDR_DB = main()
     db_ps, db_gdr = PS_DB, GDR_DB
     ps_cur = db_ps.cursor()
     gdr_cur = db_gdr.cursor()
     # Photos not included atm
-    log_add(f"Ajout du produit {id}")
+    log_add(f"Ajout du produit {id_product}")
     gdr_cur.execute(
-        f"SELECT {l_to_str(product_cols)} FROM Produit WHERE IDProduit={id}")
+        f"SELECT {l_to_str(product_cols)} FROM Produit WHERE IDProduit={id_product}")
     gdr_con = gdr_cur.fetchone()
     # print(gdr_con)
     if gdr_con is not None:
@@ -328,7 +328,7 @@ def add_id(id):
         else:
             db_add_id(db_ps, ps_con, gdr_prod)
     else:
-        log_add(f"ID {id} incorrecte")
+        log_add(f"ID {id_product} incorrecte")
 
 
 def syncventes():
@@ -348,11 +348,11 @@ def syncventes():
         sells = gdr_cur.fetchall()
         # print(sells)
         for s1 in sells:
-            sum = 0
+            ex_sum = 0
             for s2 in sells:
                 if s1[nvc['IDProduit']] == s2[nvc['IDProduit']]:
-                    sum += s2[nvc['Montant']]
-            if sum >= 0:
+                    ex_sum += s2[nvc['Montant']]
+            if ex_sum >= 0:
                 ps_cur.execute(
                     f"SELECT id_product FROM ps_product WHERE reference='{id_prod[0]}'")
                 ps_con = ps_cur.fetchone()
@@ -510,7 +510,7 @@ if __name__ == "__main__":
     ps_cat_om.grid(row=1, column=3)
 
     ps_cat_text = StringVar()
-    ps_cat_text.set("Categorie prestashop")
+    ps_cat_text.set("Catégorie prestashop")
     ps_cat_label = Label(frame, textvariable=ps_cat_text, relief=RAISED)
     ps_cat_label.grid(row=1, column=2)
 

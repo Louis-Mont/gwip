@@ -7,9 +7,13 @@ class DatabaseMySLQ(Database):
         """
         Connects to a MySQL Database
         :param ip: IP of the server
+        :type ip: str
         :param login: Login of the user of the Database
+        :type login: str
         :param pwd: Password of the user of the Database
+        :type pwd: str
         :param name: Name of the Database
+        :type name: str
         :return: Logs,True|False if connection is successful or not
         """
         try:
