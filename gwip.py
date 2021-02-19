@@ -80,7 +80,7 @@ def reset_db():
     Only resets categories, products, images in the prestashop database
     """
     """tables = ["ps_image", "ps_image_lang", "ps_image_type", "ps_image_shop", "ps_product", "ps_product_lang",
-              "ps_product_shop"]
+              "ps_product_shop","ps_stock_available"]
     tables_cat = ["ps_category", "ps_category_group", "ps_category_lang", "ps_category_shop"]
     n_c = ('id_category', (1, 2))
     PS_DB, GDR_DB = main()
