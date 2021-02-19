@@ -4,6 +4,7 @@ from tkinter import END, Tk, Entry, StringVar, Label, RAISED, Button, OptionMenu
 from datetime import datetime
 from utils import dict_to_str, l_to_str, kcv, rev_col
 from yesno import yesno
+from gw_logging.Log import Log
 
 VERSION = '1.3.0 EXPERIMENTAL'
 
@@ -15,16 +16,9 @@ PS_DB = None
 GDR_DB = None
 
 
-def log_add(lg):
-    # print(lg)
-    log.configure(state="normal")
-    log.insert(END, f"\n{lg}")
-    log.configure(state="disabled")
-
-
 def del_cat(ps_db):
     cur_ps_db = ps_db.cursor()
-    log_add("Suppression des catégories de prestashop")
+    i_log.add("Suppression des catégories de prestashop")
     cur_ps_db.execute("DELETE FROM ps_category WHERE id_category NOT IN (1,2)")
     cur_ps_db.execute(
         "DELETE FROM ps_category_group WHERE id_category NOT IN (1,2)")
@@ -34,12 +28,12 @@ def del_cat(ps_db):
     cur_ps_db.execute(
         "DELETE FROM ps_category_shop WHERE id_category NOT IN (1,2)")
     ps_db.commit()
-    log_add("Catégories supprimées")
+    i_log.add("Catégories supprimées")
 
 
 def del_prod(ps_db):
     cur_ps_db = ps_db.cursor()
-    log_add("Suppression des produits de prestashop")
+    i_log.add("Suppression des produits de prestashop")
     cur_ps_db.execute("DELETE FROM ps_product")
     cur_ps_db.execute("DELETE FROM ps_product_attribute")
     cur_ps_db.execute("DELETE FROM ps_product_attribute_combination")
@@ -49,17 +43,17 @@ def del_prod(ps_db):
     cur_ps_db.execute("DELETE FROM ps_product_shop")
     cur_ps_db.execute("DELETE FROM ps_stock_available")
     ps_db.commit()
-    log_add("Produits supprimés")
+    i_log.add("Produits supprimés")
 
 
 def del_img(ps_db):
     cur_ps_db = ps_db.cursor()
-    log_add("Suppression des images de prestashop")
+    i_log.add("Suppression des images de prestashop")
     cur_ps_db.execute("DELETE FROM ps_image")
     cur_ps_db.execute("DELETE FROM ps_image_lang")
     cur_ps_db.execute("DELETE FROM ps_image_type")
     ps_db.commit()
-    log_add("Images supprimées")
+    i_log.add("Images supprimées")
 
 
 def df(table, cur_ps, n_conditions=None):
@@ -270,10 +264,10 @@ def db_ii_id(db_ps, ps_con, gdr_prod, id_product, update=False):
         action = "mis à jour"
     else:
         action = "ajouté"
-    log_add(f"Produit {action}")
-    log_add(f"Nom : {ps_prod_lang_dict['name']}")
+    i_log.add(f"Produit {action}")
+    i_log.add(f"Nom : {ps_prod_lang_dict['name']}")
     for k, v in gdr_prod.items():
-        log_add(f"{k}:{v}")
+        i_log.add(f"{k}:{v}")
 
 
 product_cols = ["IDProduit", "Commentaire", "Désignation", "Hauteur", "IDCatégorie", "IDsous_Catégorie", "Largeur",
@@ -292,7 +286,7 @@ def add_id(id_product):
     ps_cur = db_ps.cursor()
     gdr_cur = db_gdr.cursor()
     # Photos not included atm
-    log_add(f"Ajout du produit {id_product}")
+    i_log.add(f"Ajout du produit {id_product}")
     gdr_cur.execute(
         f"SELECT {l_to_str(product_cols)} FROM Produit WHERE IDProduit={id_product}")
     gdr_con = gdr_cur.fetchone()
@@ -307,20 +301,20 @@ def add_id(id_product):
         ps_con = ps_cur.fetchall()
         if len(ps_con) == 0:
             # Ajout catégorie
-            log_add(f"Ajout {ps_cat_def.get()}")
+            i_log.add(f"Ajout {ps_cat_def.get()}")
             ps_con = add_cat(ps_cat_def.get(), db_ps)
             db_ps.commit()
-            log_add(f"Catégorie {ps_cat_def.get()} ajoutée")
+            i_log.add(f"Catégorie {ps_cat_def.get()} ajoutée")
         else:
             ps_con = ps_con[0][0]
-            log_add(f"Catégorie déjà trouvée")
+            i_log.add(f"Catégorie déjà trouvée")
 
         # Ajout Produit
         ps_cur.execute(
             f"SELECT id_product FROM ps_product WHERE reference={gdr_prod['IDProduit']}")
         id_prod = ps_cur.fetchone()
         if id_prod is not None:
-            log_add(
+            i_log.add(
                 f"La référence {gdr_prod['IDProduit']} existe déjà dans la base de donnée")
             yesno(frame, "Duplicata",
                   "La référence existe déjà dans la base de donnée, voulez-vous la mettre à jour?",
@@ -328,7 +322,7 @@ def add_id(id_product):
         else:
             db_add_id(db_ps, ps_con, gdr_prod)
     else:
-        log_add(f"ID {id_product} incorrecte")
+        i_log.add(f"ID {id_product} incorrecte")
 
 
 def syncventes():
@@ -338,7 +332,7 @@ def syncventes():
     db_ps, db_gdr = PS_DB, GDR_DB
     ps_cur = db_ps.cursor()
     gdr_cur = db_gdr.cursor()
-    log_add("Synchronisation des ventes")
+    i_log.add("Synchronisation des ventes")
 
     ps_cur.execute(f"SELECT reference FROM ps_product")
     for id_prod in ps_cur.fetchall():
@@ -372,10 +366,10 @@ def syncventes():
                     ps_prod_shop_dict.pop('quantity')
                     ii("ps_product_shop", ps_prod_shop_dict, ps_cur, cond)
 
-                    log_add(f"{id_prod[0]} mis à jour")
+                    i_log.add(f"{id_prod[0]} mis à jour")
 
     db_ps.commit()
-    log_add("Synchronisation terminée")
+    i_log.add("Synchronisation terminée")
 
 
 def main():
@@ -385,18 +379,18 @@ def main():
     prestashop_db_name = ps_db_entry.get()
 
     db_ps = None
-    log_add("Connexion à la base de données prestashop")
+    i_log.add("Connexion à la base de données prestashop")
     try:
         db_ps = pymysql.connect(host=prestashop_ip, user=prestashop_login,
                                 password=prestashop_pwd, database=prestashop_db_name)
-        log_add("Connexion réussie")
+        i_log.add("Connexion réussie")
     except pymysql.err.OperationalError as OEr:
-        log_add(f"{OEr.args[1]}")
+        i_log.add(f"{OEr.args[1]}")
 
-    log_add("Connexion à la BDD de gdr ")
+    i_log.add("Connexion à la BDD de gdr ")
     # debug = f"DSN={gdr_dsn.get()}"
     db_gdr = pypyodbc.connect(f"DSN={gdr_dsn.get()}")
-    log_add("Connexion réussie")
+    i_log.add("Connexion réussie")
 
     """cur_ps = db_ps.cursor()
     cur_db = db_gdr.cursor()
@@ -529,6 +523,7 @@ if __name__ == "__main__":
     ps_title_label = Label(frame, textvariable=ps_title_text, relief=RAISED)
     ps_title_label.grid(row=4, column=0)
 
+    # Titre du produit sur prestashop
     ps_title = Entry(frame)
     ps_title.insert(0, '')
     ps_title.insert(END, '')
@@ -538,6 +533,7 @@ if __name__ == "__main__":
     log.insert(END, 'Logs :')
     log.configure(state='disabled')
     log.grid(row=5, column=0, columnspan=4)
+    i_log = Log(log)
 
     log_scroll = Scrollbar(frame, command=log.yview)
     log_scroll.grid(row=5, column=3, sticky='nse')
@@ -559,4 +555,4 @@ if __name__ == "__main__":
         [PS_DB, GDR_DB], ['Prestashop', 'GDR']))
     frame.mainloop()
 
-    input()
+    input("Press any key to quit...")
