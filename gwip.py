@@ -523,7 +523,7 @@ if __name__ == "__main__":
     ps_title_label = Label(frame, textvariable=ps_title_text, relief=RAISED)
     ps_title_label.grid(row=4, column=0)
 
-    # Titre du produit sur prestashop
+    # Title of the product on prestashop written by the user
     ps_title = Entry(frame)
     ps_title.insert(0, '')
     ps_title.insert(END, '')
