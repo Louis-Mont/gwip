@@ -90,22 +90,25 @@ class Core:
         """
         Only resets categories, products, images in the prestashop database
         """
-        """tables = ["ps_image", "ps_image_lang", "ps_image_type", "ps_image_shop", "ps_product", "ps_product_lang",
-                  "ps_product_shop","ps_stock_available"]
+        ps_db = dbs[0]
+        tables = ["ps_image", "ps_image_lang", "ps_image_type", "ps_image_shop", "ps_product", "ps_product_lang",
+                  "ps_product_shop", "ps_category_product", "ps_stock_available"]
         tables_cat = ["ps_category", "ps_category_group", "ps_category_lang", "ps_category_shop"]
         n_c = ('id_category', (1, 2))
-        PS_DB, GDR_DB = main()
-        ps_db = PS_DB
         cur_ps = ps_db.cursor()
+        self.i_log.add("Suppression des tables")
         for t in tables:
-            df(t, cur_ps)
+            self.df(t, cur_ps)
+            self.i_log.add(f"{t} supprimé")
         for t in tables_cat:
-            df(t, cur_ps, n_c)
-        ps_db.commit()"""
-        ps_db = dbs[0]
+            self.df(t, cur_ps, n_c)
+            self.i_log.add(f"{t} supprimé")
+        ps_db.commit()
+        self.i_log.add("Tables supprimées")
+        """
         self.del_cat(ps_db)
         self.del_img(ps_db)
-        self.del_prod(ps_db)
+        self.del_prod(ps_db)"""
 
     def add_cat(self, cat, db_ps):
         """
