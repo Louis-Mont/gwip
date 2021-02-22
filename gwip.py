@@ -2,7 +2,7 @@ from tkinter import END, Tk, Entry, StringVar, Label, RAISED, Button, OptionMenu
 from gw_logging.Log import Log
 from Core.Core import Core
 
-VERSION = '1.4.0 EXPERIMENTAL'
+VERSION = '1.4.1 EXPERIMENTAL'
 
 cats = ['Meubles', 'Electroménagers', 'Multimédias', 'Textile', 'Culture', 'Loisirs', 'Vaisselle',
         'Bricolage-Jardinage',
