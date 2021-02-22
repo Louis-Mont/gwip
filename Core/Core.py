@@ -211,7 +211,7 @@ class Core:
             'id_product': f"{id_product}",
             'id_category_default': f"{ps_con}",
             'id_tax_rules_group': f"{0}",
-            'on_sale': f"{1}",
+            'on_sale': f"{0}",
             'quantity': f"{gdr_prod['Nombre']}",
             'price': f"{gdr_prod['PrixUnitaire']}",
             'wholesale_price': f"{int(gdr_prod['PrixUnitaire']) * int(gdr_prod['Nombre'])}",
@@ -328,10 +328,10 @@ class Core:
             id_prod = ps_cur.fetchone()
             if id_prod is not None:
                 self.i_log.add(
-                    f"La référence {gdr_prod['IDProduit']} existe déjà dans la base de donnée")
+                    f"La référence {gdr_prod['IDProduit']} existe déjà dans la base de données")
                 yesno(self.frame, "Duplicata",
                       "La référence existe déjà dans la base de donnée, voulez-vous la mettre à jour?",
-                      lambda: self.db_ii_id(db_ps, ps_con, gdr_prod, id_prod[0], True))
+                      lambda: self.db_ii_id(db_ps, ps_con, gdr_prod, id_prod[0], title, True))
             else:
                 self.db_add_id(db_ps, ps_con, gdr_prod, title)
         else:
