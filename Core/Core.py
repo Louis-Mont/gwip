@@ -74,13 +74,14 @@ class Core:
         ps_db.commit()
         self.i_log.add("Images supprimées")
 
-    def df(self, table, cur_ps, n_conditions=None):
+    def df(self, table, ps_db, n_conditions=None):
         """
         Delete all content from the table not in conditions
         :param table: The table you're deleting from
-        :param cur_ps: The cursor of the DB
+        :param ps_db: The database of the DB
         :param n_conditions: The no conditions
         """
+        cur_ps = ps_db.cursor()
         if n_conditions is None:
             cur_ps.execute(f"DELETE FROM {table}")
         else:
@@ -98,10 +99,10 @@ class Core:
         cur_ps = ps_db.cursor()
         self.i_log.add("Suppression des tables")
         for t in tables:
-            self.df(t, cur_ps)
+            self.df(t, ps_db)
             self.i_log.add(f"{t} supprimé")
         for t in tables_cat:
-            self.df(t, cur_ps, n_c)
+            self.df(t, ps_db, n_c)
             self.i_log.add(f"{t} supprimé")
         ps_db.commit()
         self.i_log.add("Tables supprimées")
@@ -109,6 +110,19 @@ class Core:
         self.del_cat(ps_db)
         self.del_img(ps_db)
         self.del_prod(ps_db)"""
+
+    def requirements(self, reqs):
+        """
+        :param reqs: `req: (value,errmsg)`
+        :type reqs: dict
+        :return True if all reqs are valid, False if not
+        """
+        valid = True
+        for var, req in reqs.items():
+            if var == req[0]:
+                self.i_log.add(req[1])
+                valid = False
+        return valid
 
     def add_cat(self, cat, db_ps):
         """
@@ -309,31 +323,33 @@ class Core:
             for v in range(len(gdr_con)):
                 gdr_prod[self.product_cols[v]] = gdr_con[v]
             # print(gdr_prod)
-            ps_cur.execute(
-                f"SELECT id_category,name FROM ps_category_lang WHERE name='{cat_name}'")
-            ps_con = ps_cur.fetchall()
-            if len(ps_con) == 0:
-                # Ajout catégorie
-                self.i_log.add(f"Ajout {cat_name}")
-                ps_con = self.add_cat(cat_name, db_ps)
-                db_ps.commit()
-                self.i_log.add(f"Catégorie {cat_name} ajoutée")
-            else:
-                ps_con = ps_con[0][0]
-                self.i_log.add(f"Catégorie déjà trouvée")
+            if self.requirements({gdr_prod['Nombre']: (0, "La quantité de ce produit est à 0")}):
+                # Ajout catégorie si besoin
+                ps_cur.execute(
+                    f"SELECT id_category,name FROM ps_category_lang WHERE name='{cat_name}'")
+                ps_con = ps_cur.fetchall()
+                if len(ps_con) == 0:
+                    # Ajout catégorie
+                    self.i_log.add(f"Ajout {cat_name}")
+                    ps_con = self.add_cat(cat_name, db_ps)
+                    db_ps.commit()
+                    self.i_log.add(f"Catégorie {cat_name} ajoutée")
+                else:
+                    ps_con = ps_con[0][0]
+                    self.i_log.add(f"Catégorie déjà trouvée")
 
-            # Ajout Produit
-            ps_cur.execute(
-                f"SELECT id_product FROM ps_product WHERE reference={gdr_prod['IDProduit']}")
-            id_prod = ps_cur.fetchone()
-            if id_prod is not None:
-                self.i_log.add(
-                    f"La référence {gdr_prod['IDProduit']} existe déjà dans la base de données")
-                yesno(self.frame, "Duplicata",
-                      "La référence existe déjà dans la base de donnée, voulez-vous la mettre à jour?",
-                      lambda: self.db_ii_id(db_ps, ps_con, gdr_prod, id_prod[0], title, True))
-            else:
-                self.db_add_id(db_ps, ps_con, gdr_prod, title)
+                # Ajout Produit
+                ps_cur.execute(
+                    f"SELECT id_product FROM ps_product WHERE reference={gdr_prod['IDProduit']}")
+                id_prod = ps_cur.fetchone()
+                if id_prod is not None:
+                    self.i_log.add(
+                        f"La référence {gdr_prod['IDProduit']} existe déjà dans la base de données")
+                    yesno(self.frame, "Duplicata",
+                          "La référence existe déjà dans la base de donnée, voulez-vous la mettre à jour?",
+                          lambda: self.db_ii_id(db_ps, ps_con, gdr_prod, id_prod[0], title, True))
+                else:
+                    self.db_add_id(db_ps, ps_con, gdr_prod, title)
         else:
             self.i_log.add(f"ID {id_product} incorrecte")
 
