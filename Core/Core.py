@@ -120,7 +120,7 @@ class Core:
         ps_cur = db_ps.cursor()
         date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         ps_cur.execute(f"SELECT id_category FROM ps_category")
-        cat_id = len(ps_cur.fetchall()) + 1
+        cat_id = ps_cur.fetchall()[-1][0] + 1
         lang_dict = {
             'id_category': f"{cat_id}",
             'name': f"'{cat}'",
@@ -196,7 +196,7 @@ class Core:
     def db_add_id(self, db_ps, ps_con, gdr_prod, title):
         ps_cur = db_ps.cursor()
         ps_cur.execute(f"SELECT id_product FROM ps_product")
-        prod_id = len(ps_cur.fetchall()) + 1
+        prod_id = ps_cur.fetchall()[-1][0] + 1
         self.db_ii_id(db_ps, ps_con, gdr_prod, prod_id, title)
 
     # WARNING ps_con is a tuple and work directly in strings?
@@ -250,7 +250,7 @@ class Core:
             conditions.pop('id_shop')
 
         ps_cur.execute("SELECT id_stock_available FROM ps_stock_available")
-        ps_stock_id = len(ps_cur.fetchall()) + 1
+        ps_stock_id = ps_cur.fetchall()[-1][0] + 1
         ps_stock_a_dict = {
             'id_stock_available': f"{ps_stock_id}",
             'id_product': f"{id_product}",
