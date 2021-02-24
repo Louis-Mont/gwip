@@ -96,7 +96,6 @@ class Core:
                   "ps_product_shop", "ps_category_product", "ps_stock_available", "ps_feature_product"]
         tables_cat = ["ps_category", "ps_category_group", "ps_category_lang", "ps_category_shop"]
         n_c = ('id_category', (1, 2))
-        cur_ps = ps_db.cursor()
         self.i_log.add("Suppression des tables")
         for t in tables:
             self.df(t, ps_db)
@@ -113,7 +112,7 @@ class Core:
 
     def requirements(self, reqs):
         """
-        :param reqs: `(req,(values,True|False,errmsg))` The 2nd index is the one who defines if the values are good to go
+        :param reqs: [value,([test],True|False,errmsg)]
         :type reqs: list
         :return True if all reqs are valid, False if not
         """
@@ -143,9 +142,9 @@ class Core:
         cur.execute(f"SELECT {t_id} FROM {table}")
         ids = cur.fetchall()
         if ids == ():
-            return ids[-1][0]
-        else:
             return 0
+        else:
+            return ids[-1][0]
 
     def add_cat(self, cat, db_ps):
         """
