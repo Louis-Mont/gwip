@@ -256,7 +256,7 @@ class Core:
             'weight': f"{gdr_prod['Poids']}",
             'redirect_type': f"'301-product'",
             'available_date': f"'{date}'",
-            'condition': f"'new'",
+            'condition': f"'refurbished'",
             'date_add': f"'{date}'",
             'date_upd': f"'{date}'"
         }
