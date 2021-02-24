@@ -93,7 +93,7 @@ class Core:
         """
         ps_db = dbs[0]
         tables = ["ps_image", "ps_image_lang", "ps_image_type", "ps_image_shop", "ps_product", "ps_product_lang",
-                  "ps_product_shop", "ps_category_product", "ps_stock_available"]
+                  "ps_product_shop", "ps_category_product", "ps_stock_available", "ps_feature_product"]
         tables_cat = ["ps_category", "ps_category_group", "ps_category_lang", "ps_category_shop"]
         n_c = ('id_category', (1, 2))
         cur_ps = ps_db.cursor()
@@ -240,6 +240,8 @@ class Core:
             'depth': f"{gdr_prod['Profondeur']}",
             'weight': f"{gdr_prod['Poids']}",
             'redirect_type': f"'301-product'",
+            'available_date': f"'{date}'",
+            'condition': f"'new'",
             'date_add': f"'{date}'",
             'date_upd': f"'{date}'"
         }
