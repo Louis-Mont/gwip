@@ -194,6 +194,7 @@ class Core:
         """
         if conditions is None:
             keys, values = dict_to_str(vals)
+            debug = f"INSERT INTO {table} ({keys}) VALUES ({values})"
             cur.execute(
                 f"INSERT INTO {table} ({keys}) VALUES ({values})")
         else:
@@ -240,7 +241,10 @@ class Core:
             conditions = {'id_product': id_product}
         else:
             conditions = None
-        date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        date_t = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # date = datetime.now().strftime("%Y-%m-%d")
+        # 'available_date': f"'{date}'",
+        # 'condition': f"'refurbished'",
         ps_prod_dict = {
             'id_product': f"{id_product}",
             'id_category_default': f"{ps_con}",
@@ -255,10 +259,8 @@ class Core:
             'depth': f"{gdr_prod['Profondeur']}",
             'weight': f"{gdr_prod['Poids']}",
             'redirect_type': f"'301-product'",
-            'available_date': f"'{date}'",
-            'condition': f"'refurbished'",
-            'date_add': f"'{date}'",
-            'date_upd': f"'{date}'"
+            'date_add': f"'{date_t}'",
+            'date_upd': f"'{date_t}'"
         }
         self.ii('ps_product', ps_prod_dict, ps_cur, conditions)
 
