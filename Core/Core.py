@@ -8,8 +8,8 @@ import pypyodbc
 
 
 class Core:
-    product_cols = ["IDProduit", "Commentaire", "Désignation", "Hauteur", "IDCatégorie", "IDsous_Catégorie", "Largeur",
-                    "Nombre",
+    product_cols = ["IDProduit", "Commentaire", "Désignation", "Hauteur", "IDCatégorie", "IDSortie", "IDsous_Catégorie",
+                    "Largeur", "Nombre",
                     "NumTVA", "Poids", "PoidsUnitaire", "PourcPromo", "Prix_Etiquette", "PrixPromo", "PrixUnitaire",
                     "PrixUnitCollecte", "Profondeur", "stocRestant", "Volume", "VolumeUnitaire"]
 
@@ -113,15 +113,20 @@ class Core:
 
     def requirements(self, reqs):
         """
-        :param reqs: `req: (value,errmsg)`
+        :param reqs: `req: (values,True|False,errmsg)` The 2nd index is the one who defines if the values are good to go
         :type reqs: dict
         :return True if all reqs are valid, False if not
         """
         valid = True
         for var, req in reqs.items():
-            if var == req[0]:
-                self.i_log.add(req[1])
-                valid = False
+            for r in req[0]:
+                if not (var == r) == req[1]:
+                    valid = False
+                else:
+                    valid = True
+                    break
+            if not valid:
+                self.i_log.add(req[2])
         return valid
 
     def add_cat(self, cat, db_ps):
@@ -323,7 +328,11 @@ class Core:
             for v in range(len(gdr_con)):
                 gdr_prod[self.product_cols[v]] = gdr_con[v]
             # print(gdr_prod)
-            if self.requirements({gdr_prod['Nombre']: (0, "La quantité de ce produit est à 0")}):
+            reqs = {
+                gdr_prod['Nombre']: ([0], False, "La quantité de ce produit est à 0"),
+                gdr_prod['IDSortie']: ([0, 1], True, "Ce produit ne peut pas être mis en vente")
+            }
+            if self.requirements(reqs):
                 # Ajout catégorie si besoin
                 ps_cur.execute(
                     f"SELECT id_category,name FROM ps_category_lang WHERE name='{cat_name}'")
