@@ -113,21 +113,39 @@ class Core:
 
     def requirements(self, reqs):
         """
-        :param reqs: `req: (values,True|False,errmsg)` The 2nd index is the one who defines if the values are good to go
-        :type reqs: dict
+        :param reqs: `(req,(values,True|False,errmsg))` The 2nd index is the one who defines if the values are good to go
+        :type reqs: list
         :return True if all reqs are valid, False if not
         """
         valid = True
-        for var, req in reqs.items():
-            for r in req[0]:
-                if not (var == r) == req[1]:
-                    valid = False
+        for req in reqs:
+            t_valid = True
+            for r in req[1][0]:
+                if not (req[0] == r) == req[1][1]:
+                    t_valid = False
                 else:
-                    valid = True
+                    t_valid = True
                     break
-            if not valid:
-                self.i_log.add(req[2])
+            if not t_valid:
+                self.i_log.add(req[1][2])
+            valid &= t_valid
         return valid
+
+    def last_index(self, db, table, t_id):
+        """
+        :param db: Database where the table is located
+        :type table: str
+        :type t_id: index you're checking
+        :return: Last index of the table, 0 if there is none
+        :rtype: int
+        """
+        cur = db.cursor()
+        cur.execute(f"SELECT {t_id} FROM {table}")
+        ids = cur.fetchall()
+        if ids == ():
+            return ids[-1][0]
+        else:
+            return 0
 
     def add_cat(self, cat, db_ps):
         """
@@ -138,8 +156,7 @@ class Core:
         """
         ps_cur = db_ps.cursor()
         date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        ps_cur.execute(f"SELECT id_category FROM ps_category")
-        cat_id = ps_cur.fetchall()[-1][0] + 1
+        cat_id = self.last_index(db_ps, "ps_category", "id_category") + 1
         lang_dict = {
             'id_category': f"{cat_id}",
             'name': f"'{cat}'",
@@ -213,9 +230,8 @@ class Core:
             self.ii(f'{table}', vals, cur, u_cond)
 
     def db_add_id(self, db_ps, ps_con, gdr_prod, title):
-        ps_cur = db_ps.cursor()
-        ps_cur.execute(f"SELECT id_product FROM ps_product")
-        prod_id = ps_cur.fetchall()[-1][0] + 1
+        # ps_cur = db_ps.cursor()
+        prod_id = self.last_index(db_ps, "ps_product", "id_product") + 1
         self.db_ii_id(db_ps, ps_con, gdr_prod, prod_id, title)
 
     # WARNING ps_con is a tuple and work directly in strings?
@@ -270,8 +286,7 @@ class Core:
         if conditions is not None:
             conditions.pop('id_shop')
 
-        ps_cur.execute("SELECT id_stock_available FROM ps_stock_available")
-        ps_stock_id = ps_cur.fetchall()[-1][0] + 1
+        ps_stock_id = self.last_index(db_ps, "ps_stock_available", "id_stock_available") + 1
         ps_stock_a_dict = {
             'id_stock_available': f"{ps_stock_id}",
             'id_product': f"{id_product}",
@@ -330,10 +345,10 @@ class Core:
             for v in range(len(gdr_con)):
                 gdr_prod[self.product_cols[v]] = gdr_con[v]
             # print(gdr_prod)
-            reqs = {
-                gdr_prod['Nombre']: ([0], False, "La quantité de ce produit est à 0"),
-                gdr_prod['IDSortie']: ([0, 1], True, "Ce produit ne peut pas être mis en vente")
-            }
+            reqs = [
+                (gdr_prod['Nombre'], ([0], False, "La quantité de ce produit est à 0")),
+                (gdr_prod['IDSortie'], ([0, 1], True, "Ce produit ne peut pas être mis en vente"))
+            ]
             if self.requirements(reqs):
                 # Ajout catégorie si besoin
                 ps_cur.execute(
