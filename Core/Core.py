@@ -144,7 +144,11 @@ class Core:
         if ids == ():
             return 0
         else:
-            return ids[-1][0]
+            l_ids = []
+            for id in ids:
+                l_ids.append(id[0])
+            l_ids.sort()
+            return l_ids[-1]
 
     def add_cat(self, cat, db_ps):
         """
@@ -259,7 +263,7 @@ class Core:
             'depth': f"{gdr_prod['Profondeur']}",
             'weight': f"{gdr_prod['Poids']}",
             'redirect_type': f"'301-product'",
-            'show_condition': f"{1}",
+            'show_condition': f"{0}",
             'date_add': f"'{date_t}'",
             'date_upd': f"'{date_t}'"
         }
