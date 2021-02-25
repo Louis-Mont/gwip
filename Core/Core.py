@@ -259,6 +259,7 @@ class Core:
             'depth': f"{gdr_prod['Profondeur']}",
             'weight': f"{gdr_prod['Poids']}",
             'redirect_type': f"'301-product'",
+            'show_condition': f"{1}",
             'date_add': f"'{date_t}'",
             'date_upd': f"'{date_t}'"
         }
