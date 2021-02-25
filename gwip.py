@@ -1,10 +1,10 @@
-from tkinter import END, Tk, Entry, StringVar, Label, RAISED, Button, OptionMenu, Text, Scrollbar
+from tkinter import Tk
 
 from Ui.Ui import Ui
 from gw_logging.Log import Log
 from Core.Core import Core
 
-VERSION = '1.4.1 EXPERIMENTAL'
+VERSION = '1.4.2 EXPERIMENTAL'
 
 PS_DB = None
 GDR_DB = None
