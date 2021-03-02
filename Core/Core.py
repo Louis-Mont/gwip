@@ -74,14 +74,14 @@ class Core:
         ps_db.commit()
         self.i_log.add("Images supprimées")
 
-    def df(self, table, ps_db, n_conditions=None):
+    def df(self, table, db, n_conditions=None):
         """
         Delete all content from the table not in conditions
         :param table: The table you're deleting from
-        :param ps_db: The database of the DB
+        :param db: The database
         :param n_conditions: The no conditions
         """
-        cur_ps = ps_db.cursor()
+        cur_ps = db.cursor()
         if n_conditions is None:
             cur_ps.execute(f"DELETE FROM {table}")
         else:
@@ -89,7 +89,9 @@ class Core:
 
     def reset_db(self, dbs):
         """
-        Only resets categories, products, images in the prestashop database
+        :param dbs: Only the first index is important : the one of the Prestashop Database
+        :type dbs: list
+        Resets some tables(not all) of the Prestashop Database
         """
         ps_db = dbs[0]
         tables = ["ps_image", "ps_image_lang", "ps_image_type", "ps_image_shop", "ps_product", "ps_product_lang",
