@@ -1,18 +1,21 @@
-from Database import Database
+from . import Database
 import pymysql
 
 
-class DatabaseMySLQ(Database):
+class DatabaseMySLQ(Database.Database):
+    def __init__(self):
+        super().__init__()
+
     def connect(self, ip, login, pwd, name):
         """
-        Connects to a MySQL Database
+        Connects to a MySQL db_interface
         :param ip: IP of the server
         :type ip: str
-        :param login: Login of the user of the Database
+        :param login: Login of the user of the db_interface
         :type login: str
-        :param pwd: Password of the user of the Database
+        :param pwd: Password of the user of the db_interface
         :type pwd: str
-        :param name: Name of the Database
+        :param name: Name of the db_interface
         :type name: str
         :return: Logs,True|False if connection is successful or not
         """

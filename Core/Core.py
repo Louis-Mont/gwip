@@ -132,7 +132,7 @@ class Core:
 
     def last_index(self, db, table, t_id):
         """
-        :param db: Database where the table is located
+        :param db: db_interface where the table is located
         :type table: str
         :type t_id: index you're checking
         :return: Last index of the table, 0 if there is none

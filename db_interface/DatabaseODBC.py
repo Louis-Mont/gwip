@@ -1,8 +1,11 @@
-from Database import Database
+from . import Database
 import pypyodbc
 
 
-class DatabaseODBC(Database):
+class DatabaseODBC(Database.Database):
+    def __init__(self):
+        super().__init__()
+
     def connect(self, dsn):
         """
         Connects to a DSN
