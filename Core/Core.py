@@ -37,43 +37,6 @@ class Core:
         self.i_log.add("Connexion réussie")
         return db_ps, db_gdr
 
-    def del_cat(self, ps_db):
-        cur_ps_db = ps_db.cursor()
-        self.i_log.add("Suppression des catégories de prestashop")
-        cur_ps_db.execute("DELETE FROM ps_category WHERE id_category NOT IN (1,2)")
-        cur_ps_db.execute(
-            "DELETE FROM ps_category_group WHERE id_category NOT IN (1,2)")
-        cur_ps_db.execute(
-            "DELETE FROM ps_category_lang WHERE id_category NOT IN (1,2)")
-        cur_ps_db.execute("DELETE FROM ps_category_product")
-        cur_ps_db.execute(
-            "DELETE FROM ps_category_shop WHERE id_category NOT IN (1,2)")
-        ps_db.commit()
-        self.i_log.add("Catégories supprimées")
-
-    def del_prod(self, ps_db):
-        cur_ps_db = ps_db.cursor()
-        self.i_log.add("Suppression des produits de prestashop")
-        cur_ps_db.execute("DELETE FROM ps_product")
-        cur_ps_db.execute("DELETE FROM ps_product_attribute")
-        cur_ps_db.execute("DELETE FROM ps_product_attribute_combination")
-        cur_ps_db.execute("DELETE FROM ps_product_attribute_image")
-        cur_ps_db.execute("DELETE FROM ps_product_attribute_shop")
-        cur_ps_db.execute("DELETE FROM ps_product_lang")
-        cur_ps_db.execute("DELETE FROM ps_product_shop")
-        cur_ps_db.execute("DELETE FROM ps_stock_available")
-        ps_db.commit()
-        self.i_log.add("Produits supprimés")
-
-    def del_img(self, ps_db):
-        cur_ps_db = ps_db.cursor()
-        self.i_log.add("Suppression des images de prestashop")
-        cur_ps_db.execute("DELETE FROM ps_image")
-        cur_ps_db.execute("DELETE FROM ps_image_lang")
-        cur_ps_db.execute("DELETE FROM ps_image_type")
-        ps_db.commit()
-        self.i_log.add("Images supprimées")
-
     def df(self, table, db, n_conditions=None):
         """
         Delete all content from the table not in conditions
