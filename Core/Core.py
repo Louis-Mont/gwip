@@ -109,11 +109,9 @@ class Core:
         if ids == ():
             return 0
         else:
-            l_ids = []
-            for id in ids:
-                l_ids.append(id[0])
-            l_ids.sort()
-            return l_ids[-1]
+            ids = [di[0] for di in ids]
+            ids.sort()
+            return ids[-1]
 
     def add_cat(self, cat, db_ps):
         """

@@ -2,9 +2,17 @@ from unittest import TestCase
 from Core.Core import Core
 from gw_logging.Log import Log
 from tkinter import Text, Tk
+from db_interface.DatabaseMySQL import DatabaseMySLQ
 
 
 class Test(TestCase):
+    def __init__(self, *args, **kwargs):
+        super(Test, self).__init__(*args, **kwargs)
+        self.frame = Tk()
+        self.text_log = Text()
+        self.ps_db = DatabaseMySLQ()
+        self.ps_db.connect('127.0.0.1', 'root', '', 'prestashop')
+
     def test_requirements(self):
         def reqs():
             return [
@@ -16,9 +24,7 @@ class Test(TestCase):
             'Nombre': 1,
             'IDStock': 0
         }
-        frame = Tk()
-        text_log = Text()
-        c = Core(Log(text_log), frame)
+        c = Core(Log(self.text_log), self.frame)
         self.assertTrue(c.requirements(reqs()))
 
         gdr_prod['Nombre'] = 0
