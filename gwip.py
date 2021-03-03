@@ -41,7 +41,7 @@ if __name__ == "__main__":
     frame = Tk()
     ui = Ui(frame, VERSION)
     i_log = Log(ui.log)
-    C = Core(i_log, frame)
+    C = Core(frame, i_log)
 
     ui.btn_addid.configure(
         command=lambda: C.add_id(int(ui.gdr_id.get()), ui.ps_cat_def.get(), ui.ps_title.get(), main()))
