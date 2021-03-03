@@ -97,7 +97,7 @@ class Core:
 
     def last_index(self, db, table, t_id):
         """
-        :param db: db_interface where the table is located
+        :param db: db where the table is located
         :type table: str
         :type t_id: index you're checking
         :return: Last index of the table, 0 if there is none
@@ -163,7 +163,7 @@ class Core:
         """
         if conditions is None:
             keys, values = dict_to_str(vals)
-            debug = f"INSERT INTO {table} ({keys}) VALUES ({values})"
+            # debug = f"INSERT INTO {table} ({keys}) VALUES ({values})"
             cur.execute(
                 f"INSERT INTO {table} ({keys}) VALUES ({values})")
         else:
