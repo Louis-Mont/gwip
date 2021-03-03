@@ -13,13 +13,13 @@ class Core:
                     "NumTVA", "Poids", "PoidsUnitaire", "PourcPromo", "Prix_Etiquette", "PrixPromo", "PrixUnitaire",
                     "PrixUnitCollecte", "Profondeur", "stocRestant", "Volume", "VolumeUnitaire"]
 
-    def __init__(self, log_interface, frame):
+    def __init__(self, frame, log_interface):
         """
-        :type log_interface: Log
         :type frame: Tk
+        :type log_interface: Log
         """
-        self.i_log = log_interface
         self.frame = frame
+        self.i_log = log_interface
 
     def connect(self, dsn, ip, login, pwd, name):
         db_ps = None
