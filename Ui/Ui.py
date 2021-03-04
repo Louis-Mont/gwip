@@ -70,7 +70,7 @@ class Ui:
         ps_password_label = Label(
             frame, textvariable=ps_password_text, relief=RAISED)
         ps_password_label.grid(row=3, column=0)
-        self.ps_password_text = ps_password_text
+        self.ps_password_label = ps_password_label
 
         gdr_id = Entry(frame)
         gdr_id.insert(0, '0')
@@ -143,3 +143,11 @@ class Ui:
             frame, text='Synchroniser Ventes')
         btn_syncventes.grid(row=4, column=2)
         self.btn_syncventes = btn_syncventes
+
+    def change_to_api_ui(self):
+        ps_dir_text = StringVar()
+        ps_dir_text.set("Clé Webservice")
+        self.ps_db_label.configure(textvariable=ps_dir_text)
+
+        for tr in [self.ps_login, self.ps_login_label, self.ps_password, self.ps_password_label]:
+            tr.grid_remove()
