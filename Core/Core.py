@@ -72,10 +72,6 @@ class Core:
             self.i_log.add(f"{t} supprimé")
         ps_db.commit()
         self.i_log.add("Tables supprimées")
-        """
-        self.del_cat(ps_db)
-        self.del_img(ps_db)
-        self.del_prod(ps_db)"""
 
     def requirements(self, reqs):
         """
