@@ -13,6 +13,8 @@ class Core:
                     "NumTVA", "Poids", "PoidsUnitaire", "PourcPromo", "Prix_Etiquette", "PrixPromo", "PrixUnitaire",
                     "PrixUnitCollecte", "Profondeur", "stocRestant", "Volume", "VolumeUnitaire"]
 
+    ventes_cols = ['IDProduit', 'Montant', 'IDLignes_Vente']
+
     def __init__(self, frame, log_interface):
         """
         :type frame: Tk
@@ -348,9 +350,8 @@ class Core:
         else:
             self.i_log.add(f"ID {id_product} incorrecte")
 
-    def syncventes(self, dbs):
-        ventes_cols = ['IDProduit', 'Montant', 'IDLignes_Vente']
-        nvc = rev_col(ventes_cols)
+    def sync_ventes(self, dbs):
+        nvc = rev_col(self.ventes_cols)
         db_ps = dbs[0]
         ps_cur = dbs[0].cursor()
         gdr_cur = dbs[1].cursor()
@@ -360,7 +361,7 @@ class Core:
         for id_prod in ps_cur.fetchall():
             # print(id_prod)
             gdr_cur.execute(
-                f"SELECT {l_to_str(ventes_cols)} FROM Lignes_Vente WHERE IDProduit={id_prod[0]}")
+                f"SELECT {l_to_str(self.ventes_cols)} FROM Lignes_Vente WHERE IDProduit={id_prod[0]}")
             sells = gdr_cur.fetchall()
             # print(sells)
             for s1 in sells:

@@ -46,7 +46,7 @@ if __name__ == "__main__":
     ui.btn_addid.configure(
         command=lambda: C.add_id(int(ui.gdr_id.get()), ui.ps_cat_def.get(), ui.ps_title.get(), main()))
     ui.btn_resetdb.configure(command=lambda: C.reset_db(main()))
-    ui.btn_syncventes.configure(command=lambda: C.syncventes(main()))
+    ui.btn_syncventes.configure(command=lambda: C.sync_ventes(main()))
 
     # ui.btn_resetdb.grid_remove()
     frame.protocol("WM_DELETE_WINDOW", lambda: on_closing(
