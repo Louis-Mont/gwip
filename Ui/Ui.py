@@ -148,6 +148,10 @@ class Ui:
         ps_dir_text = StringVar()
         ps_dir_text.set("Clé Webservice")
         self.ps_db_label.configure(textvariable=ps_dir_text)
+        self.ps_db_entry.delete(0, END)
+        self.ps_ip.delete(0, END)
+        self.ps_ip.insert(0, 'localhost:80')
+        self.ps_ip.insert(END, '')
 
         for tr in [self.ps_login, self.ps_login_label, self.ps_password, self.ps_password_label]:
             tr.grid_remove()
