@@ -13,6 +13,22 @@ from gw_logging.Log import Log
 VERSION = '1.4.3 EXPERIMENTAL'
 
 
+def add_product():
+    main().add_id(int(ui.gdr_id.get()), ui.ps_title.get(), ui.ps_cat_def.get())
+
+
+def reset_db():
+    main().reset_db()
+
+
+def sync_ventes():
+    main().sync_ventes()
+
+
+def main():
+    return Api(frame, i_log, ui.gdr_dsn.get(), f"http://{ui.ps_ip.get()}", ui.ps_db_entry.get())
+
+
 def on_closing(names):
     """
     When the main frame closes
@@ -24,24 +40,19 @@ def on_closing(names):
     frame.destroy()
 
 
-def main():
-    pass
-
-
 if __name__ == '__main__':
     # local
-    key = "KKLSZNHGZI21FJQE3ZVR55F1JPLRW7VZ"
-    url = "http://localhost:80/prestashop/"
+    # key = "KKLSZNHGZI21FJQE3ZVR55F1JPLRW7VZ"
+    # url = "http://localhost:80/prestashop/"
     frame = Tk()
     ui = Ui(frame, VERSION)
     ui.change_to_api_ui()
     i_log = Log(ui.log)
-    api = Api(frame, i_log, ui.gdr_dsn.get(), ui.ps_ip.get(), ui.ps_db_label)
 
     ui.btn_addid.configure(
-        command=lambda: api.add_id(int(ui.gdr_id.get()), ui.ps_title.get(), ui.ps_cat_def.get()))
-    ui.btn_resetdb.configure(command=lambda: api.reset_db())
-    ui.btn_syncventes.configure(command=lambda: api.sync_ventes())
+        command=lambda: add_product())
+    ui.btn_resetdb.configure(command=lambda: reset_db())
+    ui.btn_syncventes.configure(command=lambda: sync_ventes())
 
     # ui.btn_resetdb.grid_remove()
     frame.protocol("WM_DELETE_WINDOW", lambda: on_closing(

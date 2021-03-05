@@ -48,15 +48,18 @@ class Api(Core):
             if self.requirements(reqs):
                 # Ajout ou non de catégorie
                 cat_exists = False
+                id_cat = 0
                 for id_cat in self.get_indexes(self.api.get('categories')['categories']['category']):
-                    if self.api.get('categories', id_cat)['name']['language'][0]['attrs'] == cat_name:
+                    # debug = self.api.get('categories', id_cat)
+                    if self.api.get('categories', id_cat)['category']['name']['language'][0]['attrs'] == cat_name:
                         cat_exists = True
                         break
                 if cat_exists:
                     self.i_log.add("Catégorie trouvée")
                 else:
                     self.i_log.add(f"Ajout {cat_name}")
-                    id_cat = self.add_cat(cat_name)
+                    self.add_cat(cat_name)
+                    id_cat += 1
 
                 # Ajout produit
                 date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -70,25 +73,34 @@ class Api(Core):
                     'height': f"{gdr_prod['Hauteur']}",
                     'depth': f"{gdr_prod['Profondeur']}",
                     'weight': f"{gdr_prod['Poids']}",
-                    'price': f"{gdr_prod['PrixUnitaire']}",
+                    'state': f"{1}",
+                    'minimal_quantity': f"{1}",
+                    'price': f"{float(gdr_prod['PrixUnitaire'])}",
                     'wholesale_price': f"{int(gdr_prod['PrixUnitaire']) * int(gdr_prod['Nombre'])}",
                     'active': f"{1}",
                     'redirect_type': f"'301-product'",
+                    'available_for_order': f"{1}",
                     'show_condition': f"{1}",
+                    'show_price': f"{1}",
                     'condition': f"'refurbished'",
                     'date_add': f"'{date}'",
                     'date_upd': f"'{date}'"
                 }
+                if float(prod_dict['price']) < 1:
+                    self.i_log.add("Le prix de ce produit était à 0, il a été mis à 1")
+                    prod_dict['price'] = 1.0
                 prod_schema = {**prod_schema, **prod_dict}
                 link_rewrite = cat_name.lower().encode("ascii", "ignore").decode("utf-8")
                 self.set_lang(prod_schema, 'link_rewrite', link_rewrite)
                 self.set_lang(prod_schema, 'name', title)
 
                 prod_exists = False
+                id_prod = 0
                 for id_prod in self.get_indexes(self.api.get('products')['products']['product']):
-                    if self.api.get('products', id_prod)['reference'] == id_product:
+                    if self.api.get('products', id_prod)['product']['reference'] == id_product:
                         prod_exists = True
                 if prod_exists:
+                    prod_schema['id'] = f"{id_prod}"
                     self.i_log.add(f"La référence {id_product} existe déjà dans la base de données")
                     yesno(self.frame, "Duplicata",
                           "La référence existe déjà dans la base de données, voulez-vous la mettre à jour?",
@@ -168,4 +180,4 @@ class Api(Core):
         return False
 
     def get_indexes(self, obj_list):
-        return [int(attr['value']['id']) for attr in obj_list]
+        return [int(attr['attrs']['id']) for attr in obj_list]
