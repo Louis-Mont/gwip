@@ -24,7 +24,7 @@ class Test(TestCase):
             'Nombre': 1,
             'IDStock': 0
         }
-        c = Core(Log(self.text_log), self.frame)
+        c = Core(self.frame, Log(self.text_log))
         self.assertTrue(c.requirements(reqs()))
 
         gdr_prod['Nombre'] = 0
