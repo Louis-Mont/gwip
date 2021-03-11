@@ -62,7 +62,7 @@ class Api(Core):
                     self.i_log.add(f"La référence {id_product} existe déjà dans la base de données")
                     yesno(self.frame, "Duplicata",
                           "La référence existe déjà dans la base de données, voulez-vous la mettre à jour?",
-                          lambda: self.do_prod(id_product, title, cat_name, gdr_prod, id_prod, True))
+                          lambda: self.do_prod(id_product, title, cat_name, gdr_prod, True))
                 else:
                     self.do_prod(id_product, title, cat_name, gdr_prod)
         else:
@@ -71,12 +71,12 @@ class Api(Core):
     def do_prod(self, id_product, title, cat_name, gdr_prod, edit=False):
         # Ajout ou non de catégorie
         cat_exists = self.x_exists(('category', 'categories'), 'name', cat_name)
+        id_cat = cat_exists[1]
         if cat_exists[0]:
             self.i_log.add("Catégorie trouvée")
         else:
             self.i_log.add(f"Ajout {cat_name}")
-            self.add_cat(cat_name)
-            id_cat = cat_exists[1] + 1
+            id_cat = self.add_cat(cat_name)['id']
 
         # Ajout produit
         date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -91,54 +91,51 @@ class Api(Core):
             'weight': f"{gdr_prod['Poids']}",
             'state': f"{1}",
             'minimal_quantity': f"{1}",
-            'price': float(gdr_prod['PrixUnitaire']),
+            'price': f"{float(gdr_prod['PrixUnitaire'])}",
             'wholesale_price': f"{int(gdr_prod['PrixUnitaire']) * int(gdr_prod['Nombre'])}",
             'active': f"{1}",
             'redirect_type': f"'301-product'",
             'available_for_order': f"{1}",
             'show_condition': f"{1}",
             'show_price': f"{1}",
-            'condition': f"'refurbished'",
-            'date_add': f"'{date}'",
-            'date_upd': f"'{date}'"
+            'condition': f"refurbished",
+            'date_add': f"{date}",
+            'date_upd': f"{date}"
         }
-        if float(prod_dict['price']) < 1:
+        if float(prod_dict['price']) == 0:
             self.i_log.add("Le prix de ce produit était à 0, il a été mis à 1")
-            prod_dict['price'] = 1.0
+            prod_dict['price'] = '1.0'
         prod_schema = {**prod_schema, **prod_dict}
         link_rewrite = cat_name.lower().encode("ascii", "ignore").decode("utf-8")
         self.set_lang(prod_schema, 'link_rewrite', link_rewrite)
         self.set_lang(prod_schema, 'name', title)
-        ps_id_prod = len(self.get_indexes(('product', 'products'))) + 1
         if edit:
-            prod_dict['id'] = f"{ps_id_prod}"
-            self.api.edit('products', {'product': prod_dict})
+            p_idx = self.get_indexes(('product', 'products'))
+            i = len(p_idx)
+            for i in p_idx:
+                currprod = self.api.get('products', i)['products']['product']
+                if currprod['reference'] == gdr_prod['IDProduit']:
+                    break
+            prod_dict['id'] = i
+            p_act = self.api.edit
         else:
-            self.api.add('products', {'product': prod_schema})
+            p_act = self.api.add
+        last_prod = p_act('products', {'product': prod_schema})['prestashop']['product']
 
-        combination_schema = self.api.get('combination', options={'schema': 'blank'})['combination']
-        combination_dict = {
-            'id_product': f"{ps_id_prod}"
-        }
-        combination_schema = {**combination_schema, **combination_dict}
-        for k, v in combination_schema.items():
-            try:
-                combination_schema[k] = prod_schema[k]
-            except KeyError:
-                pass
-        self.api.add('combination', {'combination': combination_schema})
-
-        sa_schema = self.api.get('stock_available', options={'schema': 'blank'})['stock_available']
+        # Ajout quantité
+        sa_schema = self.api.get('stock_availables', options={'schema': 'blank'})['stock_available']
+        lp_asc = last_prod['associations']
         sa_dict = {
-            'id_product': f"{ps_id_prod}",
-            'id_product_attribute': f"{len(self.get_indexes(('combinations', ('combination')))) + 1}",
+            'id': f"{lp_asc['stock_availables']['stock_available']['id']}",
+            'id_product': f"{last_prod['id']}",
+            'id_product_attribute': f"{lp_asc['stock_availables']['stock_available']['id_product_attribute']}",
             'id_shop': f"{1}",
             'quantity': f"{gdr_prod['Nombre']}",
-            'depends_on_stock': f"{1}",
+            'depends_on_stock': f"{0}",
             'out_of_stock': f"{2}"
         }
         sa_schema = {**sa_schema, **sa_dict}
-        self.api.add('stock_available', {'stock_available': sa_schema})
+        self.api.edit('stock_availables', {'stock_available': sa_schema})
 
     def add_cat(self, cat):
         cat_schema = self.api.get('categories', options={'schema': 'blank'})['category']
@@ -147,14 +144,15 @@ class Api(Core):
             'id_parent': f"{2}",
             'active': f"{1}",
             'position': f"{0}",
-            'date_add': f"'{date}'",
-            'date_upd': f"'{date}'",
+            'date_add': f"{date}",
+            'date_upd': f"{date}",
         }
         # https://stackoverflow.com/questions/38987/how-do-i-merge-two-dictionaries-in-a-single-expression-taking-union-of-dictiona/228366#228366
         cat_schema = {**cat_schema, **cat_dict}
         self.set_lang(cat_schema, 'name', cat)
         link_rewrite = cat.lower().encode("ascii", "ignore").decode("utf-8")
         self.set_lang(cat_schema, 'link_rewrite', link_rewrite)
+        return self.api.add('categories', {'category': cat_schema})['prestashop']['category']
 
     def sync_ventes(self):
         self._connect()
@@ -209,6 +207,7 @@ class Api(Core):
         :return: [0] : exists?, [1]: where in the list
         :rtype: tuple
         """
+        id = 0
         for id in self.get_indexes(head_name):
             if self.api.get(head_name[1], id)[head_name[0]][x]['language'][0]['value'] == name:
                 return True, id

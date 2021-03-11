@@ -10,7 +10,7 @@ import requests
 
 from gw_logging.Log import Log
 
-VERSION = '1.4.3 EXPERIMENTAL'
+VERSION = '1.5.0 EXPERIMENTAL'
 
 
 def add_product():
@@ -49,8 +49,7 @@ if __name__ == '__main__':
     ui.change_to_api_ui()
     i_log = Log(ui.log)
 
-    ui.btn_addid.configure(
-        command=lambda: add_product())
+    ui.btn_addid.configure(command=lambda: add_product())
     ui.btn_resetdb.configure(command=lambda: reset_db())
     ui.btn_syncventes.configure(command=lambda: sync_ventes())
 
@@ -61,11 +60,7 @@ if __name__ == '__main__':
 
     input("Press any key to quit...")
     """ps = PrestaShopWebServiceDict(url, key)
-    gdr = DatabaseODBC()
-    gdr.connect("gdr")
-    cur_gdr = gdr.DB.cursor()
-    cur_gdr.execute("SELECT Photo FROM Produit WHERE IDProduit=3")
-    photo = bytes(cur_gdr.fetchall()[0][0])
+    
     prodschema = ps.get('products', options={'schema': 'blank'})['product']
     catschema = ps.get('categories', options={'schema': 'blank'})['category']
     # for k, v in prodschema.items():
@@ -81,6 +76,11 @@ if __name__ == '__main__':
 # print(type(photo))
 # print(ps.get('images/products'))
 # print(ps.get('products', 1))
+# gdr = DatabaseODBC()
+# gdr.connect("gdr")
+# cur_gdr = gdr.DB.cursor()
+# cur_gdr.execute("SELECT Photo FROM Produit WHERE IDProduit=3")
+# photo = bytes(cur_gdr.fetchall()[0][0])
 # files = {'image': (f"image-{1}.png", photo)}
 # print(requests.get(f"{url}/images/products/{1}", auth=HTTPBasicAuth(key, '')))
 # requests.post(f"{url}/images/products/{1}", files=files, auth=HTTPBasicAuth(key, ''))
