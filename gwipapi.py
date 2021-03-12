@@ -1,16 +1,15 @@
 from tkinter import Tk
+from Api.Api import Api
+from Ui.Ui import Ui
 
 from prestapyt import PrestaShopWebServiceDict
 from requests.auth import HTTPBasicAuth
-
-from Api.Api import Api
-from Ui.Ui import Ui
 from db_interface.DatabaseODBC import DatabaseODBC
 import requests
 
 from gw_logging.Log import Log
 
-VERSION = '1.5.0 EXPERIMENTAL'
+VERSION = '1.5.1 EXPERIMENTAL'
 
 
 def add_product():
@@ -42,7 +41,7 @@ def on_closing(names):
 
 if __name__ == '__main__':
     # local
-    # key = "KKLSZNHGZI21FJQE3ZVR55F1JPLRW7VZ"
+    # key = "DKG6MFPXV7EHY83JQL5RSL7PZYDWKL21"
     # url = "http://localhost:80/prestashop/"
     frame = Tk()
     ui = Ui(frame, VERSION)
@@ -59,36 +58,16 @@ if __name__ == '__main__':
     frame.mainloop()
 
     input("Press any key to quit...")
-    """ps = PrestaShopWebServiceDict(url, key)
-    
-    prodschema = ps.get('products', options={'schema': 'blank'})['product']
-    catschema = ps.get('categories', options={'schema': 'blank'})['category']
-    # for k, v in prodschema.items():
-    #    print(f"{k} : {v}")
-    for k, v in ps.get('products', 3)['product'].items():
-        print(f"{k} : {v}")"""
 
-# for k, v in catschema.items():
-#    print(f"{k} : {v}")
-# print(ps.get('categories'))
-
-# print(ps.get('products')['products']['product'])
 # print(type(photo))
 # print(ps.get('images/products'))
 # print(ps.get('products', 1))
 # gdr = DatabaseODBC()
 # gdr.connect("gdr")
 # cur_gdr = gdr.DB.cursor()
-# cur_gdr.execute("SELECT Photo FROM Produit WHERE IDProduit=3")
+# id_prod=3
+# cur_gdr.execute(f"SELECT Photo FROM Produit WHERE IDProduit={id_prod}")
 # photo = bytes(cur_gdr.fetchall()[0][0])
 # files = {'image': (f"image-{1}.png", photo)}
 # print(requests.get(f"{url}/images/products/{1}", auth=HTTPBasicAuth(key, '')))
-# requests.post(f"{url}/images/products/{1}", files=files, auth=HTTPBasicAuth(key, ''))
-# print(type(bytes(photo)))
-"""
-for k, v in ps.get('products').items():
-    for title, p in v.items():
-        for products in p:
-            # print(products)
-            print(ps.get('products', int(products['attrs']['id'])))
-            """
+# print(requests.post(f"{url}/images/products/{1}", files=files, auth=HTTPBasicAuth(key, '')))

@@ -56,7 +56,7 @@ class Api(Core):
                 prod_exists = False
                 id_prod = 0
                 for id_prod in self.get_indexes(('product', 'products')):
-                    if self.api.get('products', id_prod)['product']['reference'] == id_product:
+                    if self.api.get('products', id_prod)['product']['reference'] == str(id_product):
                         prod_exists = True
                 if prod_exists:
                     self.i_log.add(f"La référence {id_product} existe déjà dans la base de données")
@@ -69,6 +69,17 @@ class Api(Core):
             self.i_log.add(f"ID {id_product} incorrecte")
 
     def do_prod(self, id_product, title, cat_name, gdr_prod, edit=False):
+        """
+        :param id_product: The IDProduit in GDR
+        :type id_product: int
+        :type title: str
+        :type cat_name: str
+        :param gdr_prod: {title : field} of the Produit table in HDR
+        :type gdr_prod: dict
+        :param edit: if the object is edited or simply added
+        :return: The JSON response when the product was added
+        :rtype: dict
+        """
         # Ajout ou non de catégorie
         cat_exists = self.x_exists(('category', 'categories'), 'name', cat_name)
         id_cat = cat_exists[1]
@@ -109,14 +120,17 @@ class Api(Core):
         link_rewrite = cat_name.lower().encode("ascii", "ignore").decode("utf-8")
         self.set_lang(prod_schema, 'link_rewrite', link_rewrite)
         self.set_lang(prod_schema, 'name', title)
+        # Association des catégories au produit
+        prod_schema['associations']['categories']['category'] = [{'id': '2'}, {'id': f"{id_cat}"}]
+        # Edit de l'objet si exigé
         if edit:
             p_idx = self.get_indexes(('product', 'products'))
             i = len(p_idx)
             for i in p_idx:
-                currprod = self.api.get('products', i)['products']['product']
-                if currprod['reference'] == gdr_prod['IDProduit']:
+                currprod = self.api.get('products', i)['product']
+                if currprod['reference'] == str(id_product):
                     break
-            prod_dict['id'] = i
+            prod_schema['id'] = i
             p_act = self.api.edit
         else:
             p_act = self.api.add
@@ -136,8 +150,14 @@ class Api(Core):
         }
         sa_schema = {**sa_schema, **sa_dict}
         self.api.edit('stock_availables', {'stock_available': sa_schema})
+        return last_prod
 
     def add_cat(self, cat):
+        """
+        :param cat: The name of the category to add
+        :type cat: str
+        :return: The JSON response when the category was added
+        """
         cat_schema = self.api.get('categories', options={'schema': 'blank'})['category']
         date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         cat_dict = {
@@ -183,7 +203,7 @@ class Api(Core):
                         self.i_log.add(f"{id_prod[0]} mis à jour")
 
     def set_lang(self, schema, key, name):
-        # e.g. : name : {'language': [{'attrs': {'id': '1'}, 'value': ''}, {'attrs': {'id': '2'}, 'value': ''}]}
+        # e.g. key : {'language': [{'attrs': {'id': '1'}, 'value': name}, {'attrs': {'id': '2'}, 'value': name}]}
         try:
             for langs in schema[key]['language']:
                 langs['value'] = name
@@ -193,8 +213,18 @@ class Api(Core):
             return self.set_lang(schema, key, name)
 
     def reset_db(self):
-        self.api.delete('product', self.get_indexes(('product', 'products')))
-        self.api.delete('categories', self.get_indexes(('category', 'categories')))
+        self._connect()
+        prods = self.get_indexes(('product', 'products'))
+        if prods:
+            self.i_log.add("Suppression des produits")
+            self.api.delete('products', prods)
+            self.i_log.add("Produits supprimés")
+        cats = self.get_indexes(('category', 'categories'))[2:]
+        if cats:
+            self.i_log.add("Suppression des catégories")
+            self.api.delete('categories', cats)
+            self.i_log.add("Catégories supprimées")
+        # stock_available n'est pas deletable
 
     def x_exists(self, head_name, x, name):
         """
@@ -220,4 +250,6 @@ class Api(Core):
         :type head_name: tuple
         :rtype: list
         """
-        return [int(attr['attrs']['id']) for attr in self.api.get(head_name[1])[head_name[1]][head_name[0]]]
+        if self.api.get(head_name[1])[head_name[1]] != '':
+            return [int(attr['attrs']['id']) for attr in self.api.get(head_name[1])[head_name[1]][head_name[0]]]
+        return []
