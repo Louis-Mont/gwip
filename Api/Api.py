@@ -1,5 +1,7 @@
 from datetime import datetime
 from tkinter import Tk
+
+from DebugApi import DebugApi
 from gw_logging.Log import Log
 from Core.Core import Core
 from db_interface.DatabaseODBC import DatabaseODBC
@@ -9,7 +11,7 @@ from yesno import yesno
 
 
 class Api(Core):
-    def __init__(self, frame, log_interface, dsn, ip, key):
+    def __init__(self, frame, log_interface, dsn, ip, key, debug=DebugApi()):
         """
         :type frame: Tk
         :type log_interface: Log
@@ -21,6 +23,7 @@ class Api(Core):
         self.dsn = dsn
         self.ip = ip
         self.key = key
+        self.debug = debug
 
     def _connect(self):
         """
@@ -37,7 +40,7 @@ class Api(Core):
         self.api = PrestaShopWebServiceDict(self.ip, self.key)
         self.i_log.add("Connection réussie")
 
-    def add_id(self, id_product, title, cat_name):
+    def add_id(self, id_product, title, cat_name, force=False):
         self._connect()
         gdr_cur = self.gdr_db.DB.cursor()
         # Photos not included atm
@@ -52,21 +55,22 @@ class Api(Core):
                 (gdr_prod['Nombre'], ([0], False, "La quantité de ce produit est à 0")),
                 (gdr_prod['IDSortie'], ([0, 1], True, "Ce produit ne peut pas être mis en vente"))
             ]
-            if self.requirements(reqs):
+            if self.requirements(reqs) or self.debug.force_reqs:
                 prod_exists = False
-                id_prod = 0
                 for id_prod in self.get_indexes(('product', 'products')):
                     if self.api.get('products', id_prod)['product']['reference'] == str(id_product):
                         prod_exists = True
-                if prod_exists:
+                        break  # opti
+                if prod_exists and not self.debug.force_yes:
                     self.i_log.add(f"La référence {id_product} existe déjà dans la base de données")
                     yesno(self.frame, "Duplicata",
                           "La référence existe déjà dans la base de données, voulez-vous la mettre à jour?",
                           lambda: self.do_prod(id_product, title, cat_name, gdr_prod, True))
                 else:
-                    self.do_prod(id_product, title, cat_name, gdr_prod)
+                    self.do_prod(id_product, title, cat_name, gdr_prod, prod_exists)
         else:
             self.i_log.add(f"ID {id_product} incorrecte")
+        return False
 
     def do_prod(self, id_product, title, cat_name, gdr_prod, edit=False):
         """
@@ -150,7 +154,6 @@ class Api(Core):
         }
         sa_schema = {**sa_schema, **sa_dict}
         self.api.edit('stock_availables', {'stock_available': sa_schema})
-        return last_prod
 
     def add_cat(self, cat):
         """
