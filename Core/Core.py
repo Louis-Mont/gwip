@@ -24,6 +24,21 @@ class Core:
         self.i_log = log_interface
 
     def connect(self, dsn, ip, login, pwd, name):
+        """
+        Connects to the GDR DB and the Prestashop DB
+        :param dsn: Data Source Name of the GDR DB
+        :type dsn: str
+        :param ip: IP of the Prestashop DB
+        :type ip: str
+        :param login: login of the user of the Prestashop DB
+        :type ip: str
+        :param pwd: password of the user of the Prestashop DB
+        :type pwd: str
+        :param name: name of the Prestashop DB
+        :type name: str
+        :return: (Prestashop_DB,GDR_DB):
+        :rtype: tuple
+        """
         db_ps = None
         self.i_log.add("Connexion à la base de données prestashop")
         try:
