@@ -52,6 +52,7 @@ class Api(Core):
             gdr_prod = {}
             for v in range(len(gdr_con)):
                 gdr_prod[self.product_cols[v]] = gdr_con[v]
+            # Reqs can not be moved since gdr_prod needs to be set
             reqs = [
                 (gdr_prod['Nombre'], ([0], False, "La quantité de ce produit est à 0")),
                 (gdr_prod['IDSortie'], ([0, 1], True, "Ce produit ne peut pas être mis en vente"))
@@ -132,8 +133,8 @@ class Api(Core):
             p_idx = self.get_indexes(('product', 'products'))
             i = len(p_idx)
             for i in p_idx:
-                currprod = self.api.get('products', i)['product']
-                if currprod['reference'] == str(id_product):
+                curr_prod = self.api.get('products', i)['product']
+                if curr_prod['reference'] == str(id_product):
                     break
             prod_schema['id'] = i
             p_act = self.api.edit
@@ -155,6 +156,7 @@ class Api(Core):
         }
         sa_schema = {**sa_schema, **sa_dict}
         self.api.edit('stock_availables', {'stock_available': sa_schema})
+        return last_prod
 
     def add_cat(self, cat):
         """
@@ -201,8 +203,8 @@ class Api(Core):
                         'active': f"{0}",
                         'available_for_order': f"{0}"
                     }
-                    # TODO modify quantity in stock_available
                     prod_schema = {**prod_schema, **prod}
+                    # Those two attributes are not writable
                     prod_schema.pop('manufacturer_name')
                     prod_schema.pop('quantity')
                     # The position in category is sometimes over evaluated
@@ -210,6 +212,7 @@ class Api(Core):
                     if pos_cat > 0:
                         pos_cat -= 1
                     prod_schema['position_in_category']['value'] = f"{pos_cat}"
+
                     last_prod = self.api.edit('products', {'product': prod_schema})['prestashop']['product']
 
                     # Modification quantité
@@ -225,16 +228,30 @@ class Api(Core):
                     self.i_log.add(f"{id_prod} mis à jour")
 
     def set_lang(self, schema, key, name):
+        """
+        Sets the name in 2 languages e.g English and French
+        :param schema: The schema you're inserting the lang into
+        :type schema: dict
+        :param key: Key where the language is situated
+        :type key: str
+        :param name: The name that'll be displayed, the same in the 2 languages
+        :type name: str
+        :return: The schema now modified
+        :rtype: dict
+        """
         # e.g. key : {'language': [{'attrs': {'id': '1'}, 'value': name}, {'attrs': {'id': '2'}, 'value': name}]}
         try:
-            for langs in schema[key]['language']:
-                langs['value'] = name
+            for lang in schema[key]['language']:
+                lang['value'] = name
             return schema
         except KeyError:
             schema[key] = {'language': [{'attrs': {'id': '1'}, 'value': ''}, {'attrs': {'id': '2'}, 'value': ''}]}
             return self.set_lang(schema, key, name)
 
     def reset_db(self):
+        """
+        Only resets products and categories
+        """
         self._connect()
         prods = self.get_indexes(('product', 'products'))
         if prods:
@@ -259,15 +276,15 @@ class Api(Core):
         :return: [0] : exists?, [1]: where in the list
         :rtype: tuple
         """
-        id = 0
-        for id in self.get_indexes(head_name):
-            col = self.api.get(head_name[1], id)[head_name[0]][x]
+        hid = 0
+        for hid in self.get_indexes(head_name):
+            col = self.api.get(head_name[1], hid)[head_name[0]][x]
             if isinstance(col, dict):
                 if col['language'][0]['value'] == name:
-                    return True, id
+                    return True, hid
             if col == name:
-                return True, id
-        return False, id
+                return True, hid
+        return False, hid
 
     def get_indexes(self, head_name):
         """
