@@ -143,11 +143,11 @@ class Api(Core):
 
         # Ajout quantité
         sa_schema = self.api.get('stock_availables', options={'schema': 'blank'})['stock_available']
-        lp_asc = last_prod['associations']
+        prod_asc = last_prod['associations']
         sa_dict = {
-            'id': f"{lp_asc['stock_availables']['stock_available']['id']}",
+            'id': f"{prod_asc['stock_availables']['stock_available']['id']}",
             'id_product': f"{last_prod['id']}",
-            'id_product_attribute': f"{lp_asc['stock_availables']['stock_available']['id_product_attribute']}",
+            'id_product_attribute': f"{prod_asc['stock_availables']['stock_available']['id_product_attribute']}",
             'id_shop': f"{1}",
             'quantity': f"{gdr_prod['Nombre']}",
             'depends_on_stock': f"{0}",
@@ -194,16 +194,25 @@ class Api(Core):
                     if s1[nvc['IDProduit']] == s2[nvc['IDProduit']]:
                         ex_sum += s2[nvc['Montant']]
                 if ex_sum >= 0:
-                    if self.x_exists(('product', 'products'), 'reference', str(id_prod))[0]:
-                        prod_schema = self.api.get('products', options={'schema': 'blank'})['product']
+                    if self.x_exists(('product', 'products'), 'reference', reference)[0]:
+                        prod_schema = self.api.get('products', id_prod)['product']
                         prod = {
                             'on_sale': f"{0}",
-                            'quantity': f"{0}",
                             'active': f"{0}",
                             'available_for_order': f"{0}"
                         }
+                        # TODO modify quantity in stock_available
                         prod_schema = {**prod_schema, **prod}
-                        self.api.edit('product', id_prod, prod_schema)
+                        last_prod = self.api.edit('products', {'product': prod_schema})
+                        sa_schema = self.api.get('stock_availables', int(
+                            prod_schema['associations']['stock_availables']['stock_available']['id']))[
+                            'stock_available']
+                        sa = {
+                            'quantity': f"{0}",
+                            'out_of_stock': f"{1}"
+                        }
+                        sa_schema = {**sa_schema, **sa}
+                        self.api.edit('stock_availables', {'stock_available': sa_schema})
                         self.i_log.add(f"{id_prod[0]} mis à jour")
 
     def set_lang(self, schema, key, name):
@@ -243,7 +252,11 @@ class Api(Core):
         """
         id = 0
         for id in self.get_indexes(head_name):
-            if self.api.get(head_name[1], id)[head_name[0]][x]['language'][0]['value'] == name:
+            col = self.api.get(head_name[1], id)[head_name[0]][x]
+            if isinstance(col, dict):
+                if col['language'][0]['value'] == name:
+                    return True, id
+            if col == name:
                 return True, id
         return False, id
 
