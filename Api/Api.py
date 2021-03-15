@@ -41,7 +41,7 @@ class Api(Core):
         self.api = PrestaShopWebServiceDict(self.ip, self.key)
         self.i_log.add("Connection réussie")
 
-    def add_id(self, id_product, title, cat_name, force=False):
+    def add_id(self, id_product, title, cat_name):
         self._connect()
         gdr_cur = self.gdr_db.DB.cursor()
         # Photos not included atm
@@ -193,37 +193,36 @@ class Api(Core):
                 for s2 in sells:
                     if s1[nvc['IDProduit']] == s2[nvc['IDProduit']]:
                         ex_sum += s2[nvc['Montant']]
-                if ex_sum >= 0:
-                    if self.x_exists(('product', 'products'), 'reference', reference)[0]:
-                        # Modification produit
-                        prod_schema = self.api.get('products', id_prod)['product']
-                        prod = {
-                            'on_sale': f"{0}",
-                            'active': f"{0}",
-                            'available_for_order': f"{0}"
-                        }
-                        # TODO modify quantity in stock_available
-                        prod_schema = {**prod_schema, **prod}
-                        prod_schema.pop('manufacturer_name')
-                        prod_schema.pop('quantity')
-                        # The position in category is sometimes over evaluated
-                        pos_cat = int(prod_schema['position_in_category']['value'])
-                        if pos_cat > 0:
-                            pos_cat -= 1
-                        prod_schema['position_in_category']['value'] = f"{pos_cat}"
-                        last_prod = self.api.edit('products', {'product': prod_schema})['prestashop']['product']
+                if ex_sum >= 0 and self.x_exists(('product', 'products'), 'reference', reference)[0]:
+                    # Modification produit
+                    prod_schema = self.api.get('products', id_prod)['product']
+                    prod = {
+                        'on_sale': f"{0}",
+                        'active': f"{0}",
+                        'available_for_order': f"{0}"
+                    }
+                    # TODO modify quantity in stock_available
+                    prod_schema = {**prod_schema, **prod}
+                    prod_schema.pop('manufacturer_name')
+                    prod_schema.pop('quantity')
+                    # The position in category is sometimes over evaluated
+                    pos_cat = int(prod_schema['position_in_category']['value'])
+                    if pos_cat > 0:
+                        pos_cat -= 1
+                    prod_schema['position_in_category']['value'] = f"{pos_cat}"
+                    last_prod = self.api.edit('products', {'product': prod_schema})['prestashop']['product']
 
-                        # Modification quantité
-                        sa_schema = self.api.get('stock_availables', int(
-                            last_prod['associations']['stock_availables']['stock_available']['id']))[
-                            'stock_available']
-                        sa = {
-                            'quantity': f"{0}",
-                            'out_of_stock': f"{1}"
-                        }
-                        sa_schema = {**sa_schema, **sa}
-                        self.api.edit('stock_availables', {'stock_available': sa_schema})
-                        self.i_log.add(f"{id_prod} mis à jour")
+                    # Modification quantité
+                    sa_schema = self.api.get('stock_availables', int(
+                        last_prod['associations']['stock_availables']['stock_available']['id']))[
+                        'stock_available']
+                    sa = {
+                        'quantity': f"{0}",
+                        'out_of_stock': f"{1}"
+                    }
+                    sa_schema = {**sa_schema, **sa}
+                    self.api.edit('stock_availables', {'stock_available': sa_schema})
+                    self.i_log.add(f"{id_prod} mis à jour")
 
     def set_lang(self, schema, key, name):
         # e.g. key : {'language': [{'attrs': {'id': '1'}, 'value': name}, {'attrs': {'id': '2'}, 'value': name}]}
