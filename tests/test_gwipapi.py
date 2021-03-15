@@ -31,7 +31,7 @@ class TestApi(TestCase):
         self.assertEqual(len(self.api.get_indexes(('product', 'products'))), 0)
         self.assertEqual(len(self.api.get_indexes(('category', 'categories'))), 2)
 
-    def test_syncventes(self):
+    def test_sync_ventes(self):
         self.api.add_id(281474976714478, 'testsyncapi', 'Meubles')
         prods = self.api.api.get('products')['products']
         if prods != '':
