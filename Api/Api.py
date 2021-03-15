@@ -250,6 +250,10 @@ class Api(Core):
         :type head_name: tuple
         :rtype: list
         """
-        if self.api.get(head_name[1])[head_name[1]] != '':
-            return [int(attr['attrs']['id']) for attr in self.api.get(head_name[1])[head_name[1]][head_name[0]]]
+        head = self.api.get(head_name[1])[head_name[1]]
+        if head != '':
+            hh = head[head_name[0]]
+            if not isinstance(hh, dict):
+                return [int(attr['attrs']['id']) for attr in hh]
+            return [int(hh['attrs']['id'])]
         return []

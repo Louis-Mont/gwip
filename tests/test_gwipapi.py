@@ -17,8 +17,9 @@ class TestApi(TestCase):
         self.api = Api(self.frame, Log(self.text_log), self.dsn, self.ip, self.key)
 
     def test_add_product(self):
-        ps = PrestaShopWebServiceDict(self.ip, self.key)
-        old_qt = len([int(attr['attrs']['id']) for attr in ps.get('products')['products']['product']])
+        # Not recommended
+        self.api._connect()
+        old_qt = len(self.api.get_indexes(('product', 'products')))
         # debug = ps.get('products')
         self.api.add_id(281474976713888, 'testestapi', 'Meubles')
         new_qt = len(self.api.get_indexes(('product', 'products')))
