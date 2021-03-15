@@ -1,7 +1,8 @@
 from datetime import datetime
 from tkinter import Tk
 
-from DebugApi import DebugApi
+# The import is mistaking Api.py with the Api file
+from Api.DebugApi import DebugApi
 from gw_logging.Log import Log
 from Core.Core import Core
 from db_interface.DatabaseODBC import DatabaseODBC
