@@ -206,9 +206,11 @@ class Api(Core):
                         prod_schema = {**prod_schema, **prod}
                         prod_schema.pop('manufacturer_name')
                         prod_schema.pop('quantity')
-                        # The position in category is over evaluated
+                        # The position in category is sometimes over evaluated
                         pos_cat = int(prod_schema['position_in_category']['value'])
-                        prod_schema['position_in_category']['value'] = str(pos_cat - 1)
+                        if pos_cat > 0:
+                            pos_cat -= 1
+                        prod_schema['position_in_category']['value'] = f"{pos_cat}"
                         last_prod = self.api.edit('products', {'product': prod_schema})['prestashop']['product']
 
                         # Modification quantité
