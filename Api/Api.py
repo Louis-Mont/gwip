@@ -195,6 +195,7 @@ class Api(Core):
                         ex_sum += s2[nvc['Montant']]
                 if ex_sum >= 0:
                     if self.x_exists(('product', 'products'), 'reference', reference)[0]:
+                        # Modification produit
                         prod_schema = self.api.get('products', id_prod)['product']
                         prod = {
                             'on_sale': f"{0}",
@@ -203,9 +204,16 @@ class Api(Core):
                         }
                         # TODO modify quantity in stock_available
                         prod_schema = {**prod_schema, **prod}
-                        last_prod = self.api.edit('products', {'product': prod_schema})
+                        prod_schema.pop('manufacturer_name')
+                        prod_schema.pop('quantity')
+                        # The position in category is over evaluated
+                        pos_cat = int(prod_schema['position_in_category']['value'])
+                        prod_schema['position_in_category']['value'] = str(pos_cat - 1)
+                        last_prod = self.api.edit('products', {'product': prod_schema})['prestashop']['product']
+
+                        # Modification quantité
                         sa_schema = self.api.get('stock_availables', int(
-                            prod_schema['associations']['stock_availables']['stock_available']['id']))[
+                            last_prod['associations']['stock_availables']['stock_available']['id']))[
                             'stock_available']
                         sa = {
                             'quantity': f"{0}",
@@ -213,7 +221,7 @@ class Api(Core):
                         }
                         sa_schema = {**sa_schema, **sa}
                         self.api.edit('stock_availables', {'stock_available': sa_schema})
-                        self.i_log.add(f"{id_prod[0]} mis à jour")
+                        self.i_log.add(f"{id_prod} mis à jour")
 
     def set_lang(self, schema, key, name):
         # e.g. key : {'language': [{'attrs': {'id': '1'}, 'value': name}, {'attrs': {'id': '2'}, 'value': name}]}
