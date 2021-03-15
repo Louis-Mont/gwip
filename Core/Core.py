@@ -347,6 +347,11 @@ class Core:
             self.i_log.add(f"ID {id_product} incorrecte")
 
     def sync_ventes(self, dbs):
+        """
+        If a product is sold in GDR, it is updated to not be sellable on prestashop as well
+        :param dbs: Prestashop db on 0, GDR on 1
+        :type dbs: tuple
+        """
         nvc = rev_col(self.ventes_cols)
         db_ps = dbs[0]
         ps_cur = dbs[0].cursor()
