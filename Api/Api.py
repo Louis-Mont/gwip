@@ -78,6 +78,7 @@ class Api(Core):
                           lambda: self.do_prod(id_product, title, cat_name, gdr_prod, True))
                 else:
                     self.do_prod(id_product, title, cat_name, gdr_prod, prod_exists)
+                self.i_log.add("Produit ajouté")
                 return True
         else:
             self.i_log.add(f"ID {id_product} incorrecte")
@@ -103,6 +104,7 @@ class Api(Core):
         else:
             self.i_log.add(f"Ajout {cat_name}")
             id_cat = self.add_cat(cat_name)['id']
+            self.i_log.add(f"Catégorie ajoutée")
 
         # Ajout produit
         date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -128,9 +130,6 @@ class Api(Core):
             'date_add': f"{date}",
             'date_upd': f"{date}"
         }
-        if float(prod_dict['price']) == 0:
-            self.i_log.add("Le prix de ce produit était à 0, il a été mis à 1")
-            prod_dict['price'] = '1.0'
         prod_schema = {**prod_schema, **prod_dict}
         link_rewrite = cat_name.lower().encode("ascii", "ignore").decode("utf-8")
         self.set_lang(prod_schema, 'link_rewrite', link_rewrite)
