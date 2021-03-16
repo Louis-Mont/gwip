@@ -1,6 +1,9 @@
 from datetime import datetime
 from tkinter import Tk
 
+import requests
+from requests.auth import HTTPBasicAuth
+
 # The import is mistaking Api.py with the Api file
 from Api.DebugApi import DebugApi
 from gw_logging.Log import Log
@@ -21,28 +24,33 @@ class Api(Core):
         :type key: str
         """
         super().__init__(frame, log_interface)
+        # UI parameters
         self.dsn = dsn
         self.ip = ip
         self.key = key
+        # DBs
+        self.gdr_db = DatabaseODBC()
+        self.api = None
+        # Debug
         self.debug = debug
 
-    def _connect(self):
+    def connect(self):
         """
         Connects to the API and the GDR DB
         """
+        # GDR connection
         self.i_log.add("Connection à la BDD GDR")
-        self.gdr_db = DatabaseODBC()
         if self.gdr_db.connect(self.dsn):
             self.i_log.add("Connexion réussie")
         else:
             self.i_log.add("Connexion échouée")
-        #
+        # Api connection
         self.i_log.add("Connection à l'API")
         self.api = PrestaShopWebServiceDict(self.ip, self.key)
         self.i_log.add("Connection réussie")
 
     def add_id(self, id_product, title, cat_name):
-        self._connect()
+        self.connect()
         gdr_cur = self.gdr_db.DB.cursor()
         # Photos not included atm
         self.i_log.add(f"Ajout du produit {id_product}")
@@ -141,6 +149,7 @@ class Api(Core):
         else:
             p_act = self.api.add
         last_prod = p_act('products', {'product': prod_schema})['prestashop']['product']
+        self.do_img(id_product, last_prod['id'])
 
         # Ajout quantité
         sa_schema = self.api.get('stock_availables', options={'schema': 'blank'})['stock_available']
@@ -158,6 +167,26 @@ class Api(Core):
         self.api.edit('stock_availables', {'stock_available': sa_schema})
         return last_prod
 
+    def do_img(self, id_prod, ps_id_prod):
+        edit = False
+        # print(self.api.get('images/products'))
+        # print(self.api.get('products', ps_id_prod))
+        cur_gdr = self.gdr_db.DB.cursor()
+        cur_gdr.execute(f"SELECT Photo FROM Produit WHERE IDProduit={id_prod}")
+        gdr_con = cur_gdr.fetchall()
+        if len(gdr_con[0]) > 0:
+            photo = bytes(gdr_con[0][0])
+            files = {'image': (f"image-{1}.png", photo)}
+            img_url = f"{self.ip}/api/images/products/{ps_id_prod}"
+            debug = requests.get(img_url, auth=HTTPBasicAuth(self.key, ''))
+            i_act = requests.put
+            if edit:
+                i_act = requests.post
+            return i_act(img_url, files=files, auth=HTTPBasicAuth(self.key, ''))
+        else:
+            self.i_log.add("Image non trouvée")
+            return False
+
     def add_cat(self, cat):
         """
         :param cat: The name of the category to add
@@ -173,7 +202,6 @@ class Api(Core):
             'date_add': f"{date}",
             'date_upd': f"{date}",
         }
-        # https://stackoverflow.com/questions/38987/how-do-i-merge-two-dictionaries-in-a-single-expression-taking-union-of-dictiona/228366#228366
         cat_schema = {**cat_schema, **cat_dict}
         self.set_lang(cat_schema, 'name', cat)
         link_rewrite = cat.lower().encode("ascii", "ignore").decode("utf-8")
@@ -181,7 +209,7 @@ class Api(Core):
         return self.api.add('categories', {'category': cat_schema})['prestashop']['category']
 
     def sync_ventes(self):
-        self._connect()
+        self.connect()
         gdr_cur = self.gdr_db.DB.cursor()
         self.i_log.add("Synchronisation des ventes")
         for id_prod in self.get_indexes(('product', 'products')):
@@ -252,7 +280,7 @@ class Api(Core):
         """
         Only resets products and categories
         """
-        self._connect()
+        self.connect()
         prods = self.get_indexes(('product', 'products'))
         if prods:
             self.i_log.add("Suppression des produits")
