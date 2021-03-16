@@ -78,6 +78,7 @@ class Api(Core):
                           lambda: self.do_prod(id_product, title, cat_name, gdr_prod, True))
                 else:
                     self.do_prod(id_product, title, cat_name, gdr_prod, prod_exists)
+                return True
         else:
             self.i_log.add(f"ID {id_product} incorrecte")
         return False
@@ -168,9 +169,6 @@ class Api(Core):
         return last_prod
 
     def do_img(self, id_prod, ps_id_prod):
-        edit = False
-        # print(self.api.get('images/products'))
-        # print(self.api.get('products', ps_id_prod))
         cur_gdr = self.gdr_db.DB.cursor()
         cur_gdr.execute(f"SELECT Photo FROM Produit WHERE IDProduit={id_prod}")
         gdr_con = cur_gdr.fetchall()
@@ -178,11 +176,8 @@ class Api(Core):
             photo = bytes(gdr_con[0][0])
             files = {'image': (f"image-{1}.png", photo)}
             img_url = f"{self.ip}/api/images/products/{ps_id_prod}"
-            debug = requests.get(img_url, auth=HTTPBasicAuth(self.key, ''))
-            i_act = requests.put
-            if edit:
-                i_act = requests.post
-            return i_act(img_url, files=files, auth=HTTPBasicAuth(self.key, ''))
+            # debug = requests.get(img_url, auth=HTTPBasicAuth(self.key, ''))
+            return requests.post(img_url, files=files, auth=HTTPBasicAuth(self.key, ''))
         else:
             self.i_log.add("Image non trouvée")
             return False
