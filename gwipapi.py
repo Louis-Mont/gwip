@@ -9,7 +9,7 @@ import requests
 
 from gw_logging.Log import Log
 
-VERSION = '1.5.1 EXPERIMENTAL'
+VERSION = '1.5.2 EXPERIMENTAL'
 
 
 def add_product():
