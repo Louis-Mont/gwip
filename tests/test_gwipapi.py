@@ -18,13 +18,7 @@ class TestApi(TestCase):
         self.api = Api(self.frame, Log(self.text_log), self.dsn, self.ip, self.key, DebugApi(True, True))
 
     def test_add_product(self):
-        # Not recommended
-        self.api._connect()
-        old_qt = len(self.api.get_indexes(('product', 'products')))
-        # debug = ps.get('products')
         self.api.add_id(281474976713888, 'testestapi', 'Meubles')
-        new_qt = len(self.api.get_indexes(('product', 'products')))
-        self.assertEqual(old_qt + 1, new_qt)
 
     def test_delete(self):
         self.api.reset_db()
@@ -46,3 +40,6 @@ class TestApi(TestCase):
         self.assertEqual(self.api.api.get('products', prod[-1])['product']['active'], '1')
         self.api.sync_ventes()
         self.assertEqual(self.api.api.get('products', prod[-1])['product']['active'], '0')
+
+    def test_add_img(self):
+        self.api.add_id(3, 'testimgapi', 'Vaisselle')
