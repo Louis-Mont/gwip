@@ -18,7 +18,7 @@ class TestApi(TestCase):
         self.api = Api(self.frame, Log(self.text_log), self.dsn, self.ip, self.key, DebugApi(True, True))
 
     def test_add_product(self):
-        self.api.add_id(281474976713888, 'testestapi', 'Meubles')
+        self.assertTrue(self.api.add_id(281474976713888, 'testestapi', 'Meubles'))
 
     def test_delete(self):
         self.api.reset_db()
@@ -42,4 +42,4 @@ class TestApi(TestCase):
         self.assertEqual(self.api.api.get('products', prod[-1])['product']['active'], '0')
 
     def test_add_img(self):
-        self.api.add_id(3, 'testimgapi', 'Vaisselle')
+        self.assertTrue(self.api.add_id(281474976718744, 'testimgapi', 'Vaisselle'))
