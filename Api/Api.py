@@ -149,8 +149,11 @@ class Api(Core):
         else:
             p_act = self.api.add
         last_prod = p_act('products', {'product': prod_schema})['prestashop']['product']
-        self.do_img(id_product, last_prod['id'])
-        self.i_log.add("Image ajoutée")
+
+        # Ajout image
+        self.i_log.add("Ajout image")
+        if self.do_img(id_product, last_prod['id']):
+            self.i_log.add("Image ajoutée")
 
         # Ajout quantité
         sa_schema = self.api.get('stock_availables', options={'schema': 'blank'})['stock_available']
@@ -249,6 +252,7 @@ class Api(Core):
                     sa_schema = {**sa_schema, **sa}
                     self.api.edit('stock_availables', {'stock_available': sa_schema})
                     self.i_log.add(f"{id_prod} mis à jour")
+        self.i_log.add("Images synchronisées")
 
     def set_lang(self, schema, key, name):
         """
