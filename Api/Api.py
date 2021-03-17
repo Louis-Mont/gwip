@@ -150,6 +150,7 @@ class Api(Core):
             p_act = self.api.add
         last_prod = p_act('products', {'product': prod_schema})['prestashop']['product']
         self.do_img(id_product, last_prod['id'])
+        self.i_log.add("Image ajoutée")
 
         # Ajout quantité
         sa_schema = self.api.get('stock_availables', options={'schema': 'blank'})['stock_available']
