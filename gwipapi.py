@@ -2,14 +2,9 @@ from tkinter import Tk
 from Api.Api import Api
 from Ui.Ui import Ui
 
-from prestapyt import PrestaShopWebServiceDict
-from requests.auth import HTTPBasicAuth
-from db_interface.DatabaseODBC import DatabaseODBC
-import requests
-
 from gw_logging.Log import Log
 
-VERSION = '1.5.2 EXPERIMENTAL'
+VERSION = '1.5.3-alpha'
 
 
 def add_product():
