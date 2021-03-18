@@ -7,11 +7,13 @@ class Log:
         :type txt_log: Text
         """
         self.i_log = txt_log
+        self.draw_logs = True
 
     def add(self, lg):
         """
         :type lg: str
         """
-        self.i_log.configure(state="normal")
-        self.i_log.insert(END, f"\n{lg}")
-        self.i_log.configure(state="disabled")
+        if self.draw_logs:
+            self.i_log.configure(state="normal")
+            self.i_log.insert(END, f"\n{lg}")
+            self.i_log.configure(state="disabled")
