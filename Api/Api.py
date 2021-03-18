@@ -9,7 +9,7 @@ from Api.DebugApi import DebugApi
 from gw_logging.Log import Log
 from Core.Core import Core
 from db_interface.DatabaseODBC import DatabaseODBC
-from prestapyt import PrestaShopWebServiceDict, PrestaShopWebServiceError
+from prestapyt import PrestaShopWebServiceDict, PrestaShopWebServiceError, PrestaShopAuthenticationError
 from utils import l_to_str, rev_col
 from yesno import yesno
 
@@ -17,6 +17,8 @@ from yesno import yesno
 class Api(Core):
     def __init__(self, frame, log_interface, dsn, ip, key, debug=DebugApi()):
         """
+        NB : The application is trying to connect at the instantiation of the object
+        If you want to connect manually, use the connect() method
         :type frame: Tk
         :type log_interface: Log
         :type dsn: str
@@ -52,10 +54,16 @@ class Api(Core):
         # Api connection
         self.i_log.add("Connexion à l'API")
         self.api = PrestaShopWebServiceDict(self.ip, self.key)
-        self.i_log.add("Connexion réussie")
+        try:
+            self.api.get('')
+            self.i_log.add("Connexion réussie")
+        # PrestaShopAuthentificationError inherits of PrestaShopWebServiceError
+        except PrestaShopAuthenticationError as PSAuthErr:
+            self.i_log.add(f"Authentification échouée : {PSAuthErr}")
+        except PrestaShopWebServiceError:
+            self.i_log.add("Connexion échouée")
 
     def add_id(self, id_product, title, cat_name):
-        self.connect()
         gdr_cur = self.gdr_db.DB.cursor()
         # Photos not included atm
         self.i_log.add(f"Ajout du produit {id_product}")
@@ -212,7 +220,6 @@ class Api(Core):
         return self.api.add('categories', {'category': cat_schema})['prestashop']['category']
 
     def sync_ventes(self):
-        self.connect()
         gdr_cur = self.gdr_db.DB.cursor()
         self.i_log.add("Synchronisation des ventes")
         for id_prod in self.get_indexes(('product', 'products')):
@@ -284,7 +291,6 @@ class Api(Core):
         """
         Only resets products and categories
         """
-        self.connect()
         prods = self.get_indexes(('product', 'products'))
         if prods:
             self.i_log.add("Suppression des produits")
