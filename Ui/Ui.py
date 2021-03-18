@@ -8,7 +8,7 @@ class Ui:
 
     def __init__(self, frame, version):
         self.frame = frame
-        frame.title(f"GDR to Prestashop V{version}")
+        frame.title(f"GDR to Prestashop v{version}")
         frame.minsize(400, 300)
         # cols
         frame.columnconfigure(0, weight=1)
