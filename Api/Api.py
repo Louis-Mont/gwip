@@ -9,7 +9,7 @@ from Api.DebugApi import DebugApi
 from gw_logging.Log import Log
 from Core.Core import Core
 from db_interface.DatabaseODBC import DatabaseODBC
-from prestapyt import PrestaShopWebServiceDict
+from prestapyt import PrestaShopWebServiceDict, PrestaShopWebServiceError
 from utils import l_to_str, rev_col
 from yesno import yesno
 
@@ -28,9 +28,14 @@ class Api(Core):
         self.dsn = dsn
         self.ip = ip
         self.key = key
-        # DBs
+        # DB
         self.gdr_db = DatabaseODBC()
+        # Api
         self.api = None
+        # Connect
+        self.i_log.draw_logs = False
+        self.connect()
+        self.i_log.draw_logs = True
         # Debug
         self.debug = debug
 
@@ -39,15 +44,15 @@ class Api(Core):
         Connects to the API and the GDR DB
         """
         # GDR connection
-        self.i_log.add("Connection à la BDD GDR")
+        self.i_log.add("Connexion à la BDD GDR")
         if self.gdr_db.connect(self.dsn):
             self.i_log.add("Connexion réussie")
         else:
             self.i_log.add("Connexion échouée")
         # Api connection
-        self.i_log.add("Connection à l'API")
+        self.i_log.add("Connexion à l'API")
         self.api = PrestaShopWebServiceDict(self.ip, self.key)
-        self.i_log.add("Connection réussie")
+        self.i_log.add("Connexion réussie")
 
     def add_id(self, id_product, title, cat_name):
         self.connect()
