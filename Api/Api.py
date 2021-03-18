@@ -35,9 +35,9 @@ class Api(Core):
         # Api
         self.api = None
         # Connect
-        self.i_log.draw_logs = False
+        # self.i_log.draw_logs = False
         self.connect()
-        self.i_log.draw_logs = True
+        # self.i_log.draw_logs = True
         # Debug
         self.debug = debug
 
