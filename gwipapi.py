@@ -8,7 +8,10 @@ VERSION = '1.5.3-alpha'
 
 
 def add_product():
-    main().add_id(int(ui.gdr_id.get()), ui.ps_title.get(), ui.ps_cat_def.get())
+    try:
+        main().add_id(int(ui.gdr_id.get()), ui.ps_title.get(), ui.ps_cat_def.get())
+    except ValueError:
+        i_log.add("L'ID du Produit n'est pas un entier")
 
 
 def reset_db():
