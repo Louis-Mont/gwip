@@ -60,8 +60,8 @@ class Api(Core):
         # PrestaShopAuthentificationError inherits of PrestaShopWebServiceError
         except PrestaShopAuthenticationError as PSAuthErr:
             self.i_log.add(f"Authentification échouée : {PSAuthErr}")
-        except PrestaShopWebServiceError:
-            self.i_log.add("Connexion échouée")
+        except PrestaShopWebServiceError as PSWebServiceErr:
+            self.i_log.add(f"Connexion échouée : {PSWebServiceErr}")
 
     def add_id(self, id_product, title, cat_name):
         gdr_cur = self.gdr_db.DB.cursor()
