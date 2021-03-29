@@ -6,6 +6,7 @@ class Ui:
             'Bricolage-Jardinage',
             'Décoration-Bibelot', 'Puériculture']
 
+    # colors : http://www.science.smith.edu/dftwiki/index.php/Color_Charts_for_TKinter
     def __init__(self, frame, version):
         self.frame = frame
         frame.title(f"GDR to Prestashop v{version}")
