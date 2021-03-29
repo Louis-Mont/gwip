@@ -131,7 +131,7 @@ class Ui:
         log_scroll.grid(row=5, column=3, sticky='nse')
         log['yscrollcommand'] = log_scroll.set
 
-        btn_addid = Button(frame, text='Add')
+        btn_addid = Button(frame, text='Add', bg='lawn green')
         btn_addid.grid(row=3, column=2)
         self.btn_addid = btn_addid
 
