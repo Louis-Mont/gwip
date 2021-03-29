@@ -140,7 +140,7 @@ class Ui:
         self.btn_resetdb = btn_resetdb
 
         btn_syncventes = Button(
-            frame, text='Synchroniser Ventes')
+            frame, text='Synchroniser Ventes', bg='orange')
         btn_syncventes.grid(row=4, column=2)
         self.btn_syncventes = btn_syncventes
 
