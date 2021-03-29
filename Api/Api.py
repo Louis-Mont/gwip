@@ -318,8 +318,12 @@ class Api(Core):
         for hid in self.get_indexes(head_name):
             col = self.api.get(head_name[1], hid)[head_name[0]][x]
             if isinstance(col, dict):
-                if col['language'][0]['value'] == name:
-                    return True, hid
+                try:
+                    if col['language'][0]['value'] == name:
+                        return True, hid
+                except KeyError:
+                    if col['language']['value'] == name:
+                        return True, hid
             if col == name:
                 return True, hid
         return False, hid
