@@ -280,9 +280,13 @@ class Api(Core):
         """
         # e.g. key : {'language': [{'attrs': {'id': '1'}, 'value': name}, {'attrs': {'id': '2'}, 'value': name}]}
         try:
-            for lang in schema[key]['language']:
-                lang['value'] = name
-            return schema
+            klang = schema[key]['language']
+            if isinstance(klang, dict):
+                klang['value'] = name
+            else:
+                for lang in klang:
+                    lang['value'] = name
+                return schema
         except KeyError:
             schema[key] = {'language': [{'attrs': {'id': '1'}, 'value': ''}, {'attrs': {'id': '2'}, 'value': ''}]}
             return self.set_lang(schema, key, name)
