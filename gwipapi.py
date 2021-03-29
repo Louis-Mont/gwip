@@ -49,7 +49,6 @@ if __name__ == '__main__':
     ui.btn_resetdb.configure(command=lambda: reset_db())
     ui.btn_syncventes.configure(command=lambda: sync_ventes())
 
-    # ui.btn_resetdb.grid_remove()
     frame.protocol("WM_DELETE_WINDOW", lambda: on_closing(['GDR']))
     frame.mainloop()
 

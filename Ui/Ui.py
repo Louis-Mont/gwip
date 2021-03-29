@@ -155,3 +155,7 @@ class Ui:
 
         for tr in [self.ps_login, self.ps_login_label, self.ps_password, self.ps_password_label]:
             tr.grid_remove()
+
+    def mask(self):
+        for to_f in [self.gdr_dsn, self.gdr_dsn_label, self.btn_resetdb]:
+            to_f.grid_forget()
