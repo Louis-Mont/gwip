@@ -283,12 +283,13 @@ class Api(Core):
             klang = schema[key]['language']
             if isinstance(klang, dict):
                 klang['value'] = name
-            else:
+            else:  # if there is more than one lang
                 for lang in klang:
                     lang['value'] = name
-                return schema
+            return schema
         except KeyError:
-            schema[key] = {'language': [{'attrs': {'id': '1'}, 'value': ''}, {'attrs': {'id': '2'}, 'value': ''}]}
+            schema[key] = {'language': [{'attrs': {'id': f"{idl}"}, 'value': ''} for idl in
+                                        self.get_indexes(('language', 'languages'))]}
             return self.set_lang(schema, key, name)
 
     def reset_db(self):
